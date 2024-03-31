@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class Character
+class Character extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * MyAnimeList ID.
      *
@@ -40,7 +50,7 @@ class Character
     /**
      * Other Names.
      *
-     * @var string[]
+     * @var list<string>
      */
     protected $nicknames = [];
 
@@ -71,6 +81,7 @@ class Character
      */
     public function setMalId(int $malId): self
     {
+        $this->initialized['malId'] = true;
         $this->malId = $malId;
 
         return $this;
@@ -89,6 +100,7 @@ class Character
      */
     public function setUrl(string $url): self
     {
+        $this->initialized['url'] = true;
         $this->url = $url;
 
         return $this;
@@ -101,6 +113,7 @@ class Character
 
     public function setImages(CharacterImages $characterImages): self
     {
+        $this->initialized['images'] = true;
         $this->images = $characterImages;
 
         return $this;
@@ -119,6 +132,7 @@ class Character
      */
     public function setName(string $name): self
     {
+        $this->initialized['name'] = true;
         $this->name = $name;
 
         return $this;
@@ -137,6 +151,7 @@ class Character
      */
     public function setNameKanji(?string $nameKanji): self
     {
+        $this->initialized['nameKanji'] = true;
         $this->nameKanji = $nameKanji;
 
         return $this;
@@ -145,7 +160,7 @@ class Character
     /**
      * Other Names.
      *
-     * @return string[]
+     * @return list<string>
      */
     public function getNicknames(): array
     {
@@ -155,10 +170,11 @@ class Character
     /**
      * Other Names.
      *
-     * @param string[] $nicknames
+     * @param list<string> $nicknames
      */
     public function setNicknames(array $nicknames): self
     {
+        $this->initialized['nicknames'] = true;
         $this->nicknames = $nicknames;
 
         return $this;
@@ -177,6 +193,7 @@ class Character
      */
     public function setFavorites(int $favorites): self
     {
+        $this->initialized['favorites'] = true;
         $this->favorites = $favorites;
 
         return $this;
@@ -195,6 +212,7 @@ class Character
      */
     public function setAbout(?string $about): self
     {
+        $this->initialized['about'] = true;
         $this->about = $about;
 
         return $this;

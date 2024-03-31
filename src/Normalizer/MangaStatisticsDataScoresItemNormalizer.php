@@ -2,10 +2,11 @@
 
 namespace Jikan\JikanPHP\Normalizer;
 
-use ArrayObject;
 use Jane\Component\JsonSchemaRuntime\Reference;
 use Jikan\JikanPHP\Model\MangaStatisticsDataScoresItem;
 use Jikan\JikanPHP\Runtime\Normalizer\CheckArray;
+use Jikan\JikanPHP\Runtime\Normalizer\ValidatorTrait;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -13,79 +14,192 @@ use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-class MangaStatisticsDataScoresItemNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
-{
-    use DenormalizerAwareTrait;
-    use NormalizerAwareTrait;
-    use CheckArray;
-
-    public function supportsDenormalization($data, $type, $format = null): bool
+if (!class_exists(Kernel::class) || (Kernel::MAJOR_VERSION >= 7 || Kernel::MAJOR_VERSION === 6 && Kernel::MINOR_VERSION === 4)) {
+    class MangaStatisticsDataScoresItemNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
     {
-        return MangaStatisticsDataScoresItem::class === $type;
-    }
+        use DenormalizerAwareTrait;
+        use NormalizerAwareTrait;
+        use CheckArray;
+        use ValidatorTrait;
 
-    public function supportsNormalization($data, $format = null): bool
-    {
-        return is_object($data) && $data instanceof MangaStatisticsDataScoresItem;
-    }
-
-    /**
-     * @param null|mixed $format
-     */
-    public function denormalize($data, $class, $format = null, array $context = []): Reference|MangaStatisticsDataScoresItem
-    {
-        if (isset($data['$ref'])) {
-            return new Reference($data['$ref'], $context['document-origin']);
+        public function supportsDenormalization(mixed $data, string $type, ?string $format = null, array $context = []): bool
+        {
+            return MangaStatisticsDataScoresItem::class === $type;
         }
 
-        if (isset($data['$recursiveRef'])) {
-            return new Reference($data['$recursiveRef'], $context['document-origin']);
+        public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
+        {
+            return is_object($data) && $data instanceof MangaStatisticsDataScoresItem;
         }
 
-        $mangaStatisticsDataScoresItem = new MangaStatisticsDataScoresItem();
-        if (\array_key_exists('percentage', $data) && \is_int($data['percentage'])) {
-            $data['percentage'] = (float) $data['percentage'];
-        }
+        public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): mixed
+        {
+            if (isset($data['$ref'])) {
+                return new Reference($data['$ref'], $context['document-origin']);
+            }
 
-        if (null === $data || !\is_array($data)) {
+            if (isset($data['$recursiveRef'])) {
+                return new Reference($data['$recursiveRef'], $context['document-origin']);
+            }
+
+            $mangaStatisticsDataScoresItem = new MangaStatisticsDataScoresItem();
+            if (\array_key_exists('percentage', $data) && \is_int($data['percentage'])) {
+                $data['percentage'] = (float) $data['percentage'];
+            }
+
+            if (null === $data || !\is_array($data)) {
+                return $mangaStatisticsDataScoresItem;
+            }
+
+            if (\array_key_exists('score', $data)) {
+                $mangaStatisticsDataScoresItem->setScore($data['score']);
+                unset($data['score']);
+            }
+
+            if (\array_key_exists('votes', $data)) {
+                $mangaStatisticsDataScoresItem->setVotes($data['votes']);
+                unset($data['votes']);
+            }
+
+            if (\array_key_exists('percentage', $data)) {
+                $mangaStatisticsDataScoresItem->setPercentage($data['percentage']);
+                unset($data['percentage']);
+            }
+
+            foreach ($data as $key => $value) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $mangaStatisticsDataScoresItem[$key] = $value;
+                }
+            }
+
             return $mangaStatisticsDataScoresItem;
         }
 
-        if (\array_key_exists('score', $data)) {
-            $mangaStatisticsDataScoresItem->setScore($data['score']);
+        public function normalize(mixed $object, ?string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
+        {
+            $data = [];
+            if ($object->isInitialized('score') && null !== $object->getScore()) {
+                $data['score'] = $object->getScore();
+            }
+
+            if ($object->isInitialized('votes') && null !== $object->getVotes()) {
+                $data['votes'] = $object->getVotes();
+            }
+
+            if ($object->isInitialized('percentage') && null !== $object->getPercentage()) {
+                $data['percentage'] = $object->getPercentage();
+            }
+
+            foreach ($object as $key => $value) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $data[$key] = $value;
+                }
+            }
+
+            return $data;
         }
 
-        if (\array_key_exists('votes', $data)) {
-            $mangaStatisticsDataScoresItem->setVotes($data['votes']);
+        public function getSupportedTypes(?string $format = null): array
+        {
+            return [MangaStatisticsDataScoresItem::class => false];
         }
-
-        if (\array_key_exists('percentage', $data)) {
-            $mangaStatisticsDataScoresItem->setPercentage($data['percentage']);
-        }
-
-        return $mangaStatisticsDataScoresItem;
     }
-
-    /**
-     * @param null|mixed $format
-     *
-     * @return array|string|int|float|bool|ArrayObject|null
-     */
-    public function normalize($object, $format = null, array $context = []): array
+} else {
+    class MangaStatisticsDataScoresItemNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
     {
-        $data = [];
-        if (null !== $object->getScore()) {
-            $data['score'] = $object->getScore();
+        use DenormalizerAwareTrait;
+        use NormalizerAwareTrait;
+        use CheckArray;
+        use ValidatorTrait;
+
+        public function supportsDenormalization($data, $type, ?string $format = null, array $context = []): bool
+        {
+            return MangaStatisticsDataScoresItem::class === $type;
         }
 
-        if (null !== $object->getVotes()) {
-            $data['votes'] = $object->getVotes();
+        public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
+        {
+            return is_object($data) && $data instanceof MangaStatisticsDataScoresItem;
         }
 
-        if (null !== $object->getPercentage()) {
-            $data['percentage'] = $object->getPercentage();
+        /**
+         * @param null|mixed $format
+         */
+        public function denormalize($data, $type, $format = null, array $context = []): Reference|MangaStatisticsDataScoresItem
+        {
+            if (isset($data['$ref'])) {
+                return new Reference($data['$ref'], $context['document-origin']);
+            }
+
+            if (isset($data['$recursiveRef'])) {
+                return new Reference($data['$recursiveRef'], $context['document-origin']);
+            }
+
+            $mangaStatisticsDataScoresItem = new MangaStatisticsDataScoresItem();
+            if (\array_key_exists('percentage', $data) && \is_int($data['percentage'])) {
+                $data['percentage'] = (float) $data['percentage'];
+            }
+
+            if (null === $data || !\is_array($data)) {
+                return $mangaStatisticsDataScoresItem;
+            }
+
+            if (\array_key_exists('score', $data)) {
+                $mangaStatisticsDataScoresItem->setScore($data['score']);
+                unset($data['score']);
+            }
+
+            if (\array_key_exists('votes', $data)) {
+                $mangaStatisticsDataScoresItem->setVotes($data['votes']);
+                unset($data['votes']);
+            }
+
+            if (\array_key_exists('percentage', $data)) {
+                $mangaStatisticsDataScoresItem->setPercentage($data['percentage']);
+                unset($data['percentage']);
+            }
+
+            foreach ($data as $key => $value) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $mangaStatisticsDataScoresItem[$key] = $value;
+                }
+            }
+
+            return $mangaStatisticsDataScoresItem;
         }
 
-        return $data;
+        /**
+         * @param null|mixed $format
+         *
+         * @return array|string|int|float|bool|\ArrayObject|null
+         */
+        public function normalize($object, $format = null, array $context = [])
+        {
+            $data = [];
+            if ($object->isInitialized('score') && null !== $object->getScore()) {
+                $data['score'] = $object->getScore();
+            }
+
+            if ($object->isInitialized('votes') && null !== $object->getVotes()) {
+                $data['votes'] = $object->getVotes();
+            }
+
+            if ($object->isInitialized('percentage') && null !== $object->getPercentage()) {
+                $data['percentage'] = $object->getPercentage();
+            }
+
+            foreach ($object as $key => $value) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $data[$key] = $value;
+                }
+            }
+
+            return $data;
+        }
+
+        public function getSupportedTypes(?string $format = null): array
+        {
+            return [MangaStatisticsDataScoresItem::class => false];
+        }
     }
 }

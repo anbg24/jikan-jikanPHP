@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class PaginationPlusPagination
+class PaginationPlusPagination extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * @var int
      */
@@ -26,6 +36,7 @@ class PaginationPlusPagination
 
     public function setLastVisiblePage(int $lastVisiblePage): self
     {
+        $this->initialized['lastVisiblePage'] = true;
         $this->lastVisiblePage = $lastVisiblePage;
 
         return $this;
@@ -38,6 +49,7 @@ class PaginationPlusPagination
 
     public function setHasNextPage(bool $hasNextPage): self
     {
+        $this->initialized['hasNextPage'] = true;
         $this->hasNextPage = $hasNextPage;
 
         return $this;
@@ -50,6 +62,7 @@ class PaginationPlusPagination
 
     public function setItems(PaginationPlusPaginationItems $paginationPlusPaginationItems): self
     {
+        $this->initialized['items'] = true;
         $this->items = $paginationPlusPaginationItems;
 
         return $this;

@@ -7,6 +7,7 @@ use Jikan\JikanPHP\Model\UserHistory;
 use Jikan\JikanPHP\Runtime\Client\BaseEndpoint;
 use Jikan\JikanPHP\Runtime\Client\Endpoint;
 use Jikan\JikanPHP\Runtime\Client\EndpointTrait;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -15,8 +16,8 @@ class GetUserHistory extends BaseEndpoint implements Endpoint
     /**
      * @param array $queryParameters {
      *
-     *     @var string $type
-     * }
+     * @var string $type
+     *             }
      */
     public function __construct(protected string $username, array $queryParameters = [])
     {
@@ -51,7 +52,7 @@ class GetUserHistory extends BaseEndpoint implements Endpoint
         $optionsResolver->setDefined(['type']);
         $optionsResolver->setRequired([]);
         $optionsResolver->setDefaults([]);
-        $optionsResolver->setAllowedTypes('type', ['string']);
+        $optionsResolver->addAllowedTypes('type', ['string']);
 
         return $optionsResolver;
     }
@@ -63,14 +64,16 @@ class GetUserHistory extends BaseEndpoint implements Endpoint
      *
      * @return null|UserHistory
      */
-    protected function transformResponseBody(string $body, int $status, SerializerInterface $serializer, ?string $contentType = null)
+    protected function transformResponseBody(ResponseInterface $response, SerializerInterface $serializer, ?string $contentType = null)
     {
-        if (!is_null($contentType) && (200 === $status && false !== mb_strpos($contentType, 'application/json'))) {
+        $statusCode = $response->getStatusCode();
+        $body = (string) $response->getBody();
+        if (!is_null($contentType) && (200 === $statusCode && false !== mb_strpos($contentType, 'application/json'))) {
             return $serializer->deserialize($body, UserHistory::class, 'json');
         }
 
-        if (400 === $status) {
-            throw new GetUserHistoryBadRequestException();
+        if (400 === $statusCode) {
+            throw new GetUserHistoryBadRequestException($response);
         }
     }
 

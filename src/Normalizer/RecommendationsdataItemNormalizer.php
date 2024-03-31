@@ -2,11 +2,12 @@
 
 namespace Jikan\JikanPHP\Normalizer;
 
-use ArrayObject;
 use Jane\Component\JsonSchemaRuntime\Reference;
 use Jikan\JikanPHP\Model\RecommendationsdataItem;
 use Jikan\JikanPHP\Model\UserById;
 use Jikan\JikanPHP\Runtime\Normalizer\CheckArray;
+use Jikan\JikanPHP\Runtime\Normalizer\ValidatorTrait;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -14,93 +15,242 @@ use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-class RecommendationsdataItemNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
-{
-    use DenormalizerAwareTrait;
-    use NormalizerAwareTrait;
-    use CheckArray;
-
-    public function supportsDenormalization($data, $type, $format = null): bool
+if (!class_exists(Kernel::class) || (Kernel::MAJOR_VERSION >= 7 || Kernel::MAJOR_VERSION === 6 && Kernel::MINOR_VERSION === 4)) {
+    class RecommendationsdataItemNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
     {
-        return RecommendationsdataItem::class === $type;
-    }
+        use DenormalizerAwareTrait;
+        use NormalizerAwareTrait;
+        use CheckArray;
+        use ValidatorTrait;
 
-    public function supportsNormalization($data, $format = null): bool
-    {
-        return is_object($data) && $data instanceof RecommendationsdataItem;
-    }
-
-    /**
-     * @param null|mixed $format
-     */
-    public function denormalize($data, $class, $format = null, array $context = []): Reference|RecommendationsdataItem
-    {
-        if (isset($data['$ref'])) {
-            return new Reference($data['$ref'], $context['document-origin']);
+        public function supportsDenormalization(mixed $data, string $type, ?string $format = null, array $context = []): bool
+        {
+            return RecommendationsdataItem::class === $type;
         }
 
-        if (isset($data['$recursiveRef'])) {
-            return new Reference($data['$recursiveRef'], $context['document-origin']);
+        public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
+        {
+            return is_object($data) && $data instanceof RecommendationsdataItem;
         }
 
-        $recommendationsdataItem = new RecommendationsdataItem();
-        if (null === $data || !\is_array($data)) {
+        public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): mixed
+        {
+            if (isset($data['$ref'])) {
+                return new Reference($data['$ref'], $context['document-origin']);
+            }
+
+            if (isset($data['$recursiveRef'])) {
+                return new Reference($data['$recursiveRef'], $context['document-origin']);
+            }
+
+            $recommendationsdataItem = new RecommendationsdataItem();
+            if (null === $data || !\is_array($data)) {
+                return $recommendationsdataItem;
+            }
+
+            if (\array_key_exists('mal_id', $data)) {
+                $recommendationsdataItem->setMalId($data['mal_id']);
+                unset($data['mal_id']);
+            }
+
+            if (\array_key_exists('entry', $data)) {
+                $values = [];
+                foreach ($data['entry'] as $value) {
+                    $values_1 = new \ArrayObject([], \ArrayObject::ARRAY_AS_PROPS);
+                    foreach ($value as $key => $value_1) {
+                        $values_1[$key] = $value_1;
+                    }
+
+                    $values[] = $values_1;
+                }
+
+                $recommendationsdataItem->setEntry($values);
+                unset($data['entry']);
+            }
+
+            if (\array_key_exists('content', $data)) {
+                $recommendationsdataItem->setContent($data['content']);
+                unset($data['content']);
+            }
+
+            if (\array_key_exists('user', $data)) {
+                $recommendationsdataItem->setUser($this->denormalizer->denormalize($data['user'], UserById::class, 'json', $context));
+                unset($data['user']);
+            }
+
+            foreach ($data as $key_1 => $value_2) {
+                if (preg_match('#.*#', (string) $key_1)) {
+                    $recommendationsdataItem[$key_1] = $value_2;
+                }
+            }
+
             return $recommendationsdataItem;
         }
 
-        if (\array_key_exists('mal_id', $data)) {
-            $recommendationsdataItem->setMalId($data['mal_id']);
-        }
-
-        if (\array_key_exists('entry', $data)) {
-            $values = [];
-            foreach ($data['entry'] as $value) {
-                $values[] = $value;
+        public function normalize(mixed $object, ?string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
+        {
+            $data = [];
+            if ($object->isInitialized('malId') && null !== $object->getMalId()) {
+                $data['mal_id'] = $object->getMalId();
             }
 
-            $recommendationsdataItem->setEntry($values);
+            if ($object->isInitialized('entry') && null !== $object->getEntry()) {
+                $values = [];
+                foreach ($object->getEntry() as $value) {
+                    $values_1 = [];
+                    foreach ($value as $key => $value_1) {
+                        $values_1[$key] = $value_1;
+                    }
+
+                    $values[] = $values_1;
+                }
+
+                $data['entry'] = $values;
+            }
+
+            if ($object->isInitialized('content') && null !== $object->getContent()) {
+                $data['content'] = $object->getContent();
+            }
+
+            if ($object->isInitialized('user') && null !== $object->getUser()) {
+                $data['user'] = $this->normalizer->normalize($object->getUser(), 'json', $context);
+            }
+
+            foreach ($object as $key_1 => $value_2) {
+                if (preg_match('#.*#', (string) $key_1)) {
+                    $data[$key_1] = $value_2;
+                }
+            }
+
+            return $data;
         }
 
-        if (\array_key_exists('content', $data)) {
-            $recommendationsdataItem->setContent($data['content']);
+        public function getSupportedTypes(?string $format = null): array
+        {
+            return [RecommendationsdataItem::class => false];
         }
-
-        if (\array_key_exists('user', $data)) {
-            $recommendationsdataItem->setUser($this->denormalizer->denormalize($data['user'], UserById::class, 'json', $context));
-        }
-
-        return $recommendationsdataItem;
     }
-
-    /**
-     * @param null|mixed $format
-     *
-     * @return array|string|int|float|bool|ArrayObject|null
-     */
-    public function normalize($object, $format = null, array $context = []): array
+} else {
+    class RecommendationsdataItemNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
     {
-        $data = [];
-        if (null !== $object->getMalId()) {
-            $data['mal_id'] = $object->getMalId();
+        use DenormalizerAwareTrait;
+        use NormalizerAwareTrait;
+        use CheckArray;
+        use ValidatorTrait;
+
+        public function supportsDenormalization($data, $type, ?string $format = null, array $context = []): bool
+        {
+            return RecommendationsdataItem::class === $type;
         }
 
-        if (null !== $object->getEntry()) {
-            $values = [];
-            foreach ($object->getEntry() as $value) {
-                $values[] = $value;
+        public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
+        {
+            return is_object($data) && $data instanceof RecommendationsdataItem;
+        }
+
+        /**
+         * @param null|mixed $format
+         */
+        public function denormalize($data, $type, $format = null, array $context = []): Reference|RecommendationsdataItem
+        {
+            if (isset($data['$ref'])) {
+                return new Reference($data['$ref'], $context['document-origin']);
             }
 
-            $data['entry'] = $values;
+            if (isset($data['$recursiveRef'])) {
+                return new Reference($data['$recursiveRef'], $context['document-origin']);
+            }
+
+            $recommendationsdataItem = new RecommendationsdataItem();
+            if (null === $data || !\is_array($data)) {
+                return $recommendationsdataItem;
+            }
+
+            if (\array_key_exists('mal_id', $data)) {
+                $recommendationsdataItem->setMalId($data['mal_id']);
+                unset($data['mal_id']);
+            }
+
+            if (\array_key_exists('entry', $data)) {
+                $values = [];
+                foreach ($data['entry'] as $value) {
+                    $values_1 = new \ArrayObject([], \ArrayObject::ARRAY_AS_PROPS);
+                    foreach ($value as $key => $value_1) {
+                        $values_1[$key] = $value_1;
+                    }
+
+                    $values[] = $values_1;
+                }
+
+                $recommendationsdataItem->setEntry($values);
+                unset($data['entry']);
+            }
+
+            if (\array_key_exists('content', $data)) {
+                $recommendationsdataItem->setContent($data['content']);
+                unset($data['content']);
+            }
+
+            if (\array_key_exists('user', $data)) {
+                $recommendationsdataItem->setUser($this->denormalizer->denormalize($data['user'], UserById::class, 'json', $context));
+                unset($data['user']);
+            }
+
+            foreach ($data as $key_1 => $value_2) {
+                if (preg_match('#.*#', (string) $key_1)) {
+                    $recommendationsdataItem[$key_1] = $value_2;
+                }
+            }
+
+            return $recommendationsdataItem;
         }
 
-        if (null !== $object->getContent()) {
-            $data['content'] = $object->getContent();
+        /**
+         * @param null|mixed $format
+         *
+         * @return array|string|int|float|bool|\ArrayObject|null
+         */
+        public function normalize($object, $format = null, array $context = [])
+        {
+            $data = [];
+            if ($object->isInitialized('malId') && null !== $object->getMalId()) {
+                $data['mal_id'] = $object->getMalId();
+            }
+
+            if ($object->isInitialized('entry') && null !== $object->getEntry()) {
+                $values = [];
+                foreach ($object->getEntry() as $value) {
+                    $values_1 = [];
+                    foreach ($value as $key => $value_1) {
+                        $values_1[$key] = $value_1;
+                    }
+
+                    $values[] = $values_1;
+                }
+
+                $data['entry'] = $values;
+            }
+
+            if ($object->isInitialized('content') && null !== $object->getContent()) {
+                $data['content'] = $object->getContent();
+            }
+
+            if ($object->isInitialized('user') && null !== $object->getUser()) {
+                $data['user'] = $this->normalizer->normalize($object->getUser(), 'json', $context);
+            }
+
+            foreach ($object as $key_1 => $value_2) {
+                if (preg_match('#.*#', (string) $key_1)) {
+                    $data[$key_1] = $value_2;
+                }
+            }
+
+            return $data;
         }
 
-        if (null !== $object->getUser()) {
-            $data['user'] = $this->normalizer->normalize($object->getUser(), 'json', $context);
+        public function getSupportedTypes(?string $format = null): array
+        {
+            return [RecommendationsdataItem::class => false];
         }
-
-        return $data;
     }
 }

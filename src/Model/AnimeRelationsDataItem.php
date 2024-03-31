@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class AnimeRelationsDataItem
+class AnimeRelationsDataItem extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * Relation type.
      *
@@ -12,7 +22,7 @@ class AnimeRelationsDataItem
     protected $relation;
 
     /**
-     * @var MalUrl[]
+     * @var list<MalUrl>
      */
     protected $entry = [];
 
@@ -29,13 +39,14 @@ class AnimeRelationsDataItem
      */
     public function setRelation(string $relation): self
     {
+        $this->initialized['relation'] = true;
         $this->relation = $relation;
 
         return $this;
     }
 
     /**
-     * @return MalUrl[]
+     * @return list<MalUrl>
      */
     public function getEntry(): array
     {
@@ -43,10 +54,11 @@ class AnimeRelationsDataItem
     }
 
     /**
-     * @param MalUrl[] $entry
+     * @param list<MalUrl> $entry
      */
     public function setEntry(array $entry): self
     {
+        $this->initialized['entry'] = true;
         $this->entry = $entry;
 
         return $this;

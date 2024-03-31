@@ -2,12 +2,13 @@
 
 namespace Jikan\JikanPHP\Normalizer;
 
-use ArrayObject;
 use Jane\Component\JsonSchemaRuntime\Reference;
 use Jikan\JikanPHP\Model\DaterangeProp;
 use Jikan\JikanPHP\Model\DaterangePropFrom;
 use Jikan\JikanPHP\Model\DaterangePropTo;
 use Jikan\JikanPHP\Runtime\Normalizer\CheckArray;
+use Jikan\JikanPHP\Runtime\Normalizer\ValidatorTrait;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -15,77 +16,188 @@ use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-class DaterangePropNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
-{
-    use DenormalizerAwareTrait;
-    use NormalizerAwareTrait;
-    use CheckArray;
-
-    public function supportsDenormalization($data, $type, $format = null): bool
+if (!class_exists(Kernel::class) || (Kernel::MAJOR_VERSION >= 7 || Kernel::MAJOR_VERSION === 6 && Kernel::MINOR_VERSION === 4)) {
+    class DaterangePropNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
     {
-        return DaterangeProp::class === $type;
-    }
+        use DenormalizerAwareTrait;
+        use NormalizerAwareTrait;
+        use CheckArray;
+        use ValidatorTrait;
 
-    public function supportsNormalization($data, $format = null): bool
-    {
-        return is_object($data) && $data instanceof DaterangeProp;
-    }
-
-    /**
-     * @param null|mixed $format
-     */
-    public function denormalize($data, $class, $format = null, array $context = []): Reference|DaterangeProp
-    {
-        if (isset($data['$ref'])) {
-            return new Reference($data['$ref'], $context['document-origin']);
+        public function supportsDenormalization(mixed $data, string $type, ?string $format = null, array $context = []): bool
+        {
+            return DaterangeProp::class === $type;
         }
 
-        if (isset($data['$recursiveRef'])) {
-            return new Reference($data['$recursiveRef'], $context['document-origin']);
+        public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
+        {
+            return is_object($data) && $data instanceof DaterangeProp;
         }
 
-        $daterangeProp = new DaterangeProp();
-        if (null === $data || !\is_array($data)) {
+        public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): mixed
+        {
+            if (isset($data['$ref'])) {
+                return new Reference($data['$ref'], $context['document-origin']);
+            }
+
+            if (isset($data['$recursiveRef'])) {
+                return new Reference($data['$recursiveRef'], $context['document-origin']);
+            }
+
+            $daterangeProp = new DaterangeProp();
+            if (null === $data || !\is_array($data)) {
+                return $daterangeProp;
+            }
+
+            if (\array_key_exists('from', $data)) {
+                $daterangeProp->setFrom($this->denormalizer->denormalize($data['from'], DaterangePropFrom::class, 'json', $context));
+                unset($data['from']);
+            }
+
+            if (\array_key_exists('to', $data)) {
+                $daterangeProp->setTo($this->denormalizer->denormalize($data['to'], DaterangePropTo::class, 'json', $context));
+                unset($data['to']);
+            }
+
+            if (\array_key_exists('string', $data) && null !== $data['string']) {
+                $daterangeProp->setString($data['string']);
+                unset($data['string']);
+            } elseif (\array_key_exists('string', $data) && null === $data['string']) {
+                $daterangeProp->setString(null);
+            }
+
+            foreach ($data as $key => $value) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $daterangeProp[$key] = $value;
+                }
+            }
+
             return $daterangeProp;
         }
 
-        if (\array_key_exists('from', $data)) {
-            $daterangeProp->setFrom($this->denormalizer->denormalize($data['from'], DaterangePropFrom::class, 'json', $context));
+        public function normalize(mixed $object, ?string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
+        {
+            $data = [];
+            if ($object->isInitialized('from') && null !== $object->getFrom()) {
+                $data['from'] = $this->normalizer->normalize($object->getFrom(), 'json', $context);
+            }
+
+            if ($object->isInitialized('to') && null !== $object->getTo()) {
+                $data['to'] = $this->normalizer->normalize($object->getTo(), 'json', $context);
+            }
+
+            if ($object->isInitialized('string') && null !== $object->getString()) {
+                $data['string'] = $object->getString();
+            }
+
+            foreach ($object as $key => $value) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $data[$key] = $value;
+                }
+            }
+
+            return $data;
         }
 
-        if (\array_key_exists('to', $data)) {
-            $daterangeProp->setTo($this->denormalizer->denormalize($data['to'], DaterangePropTo::class, 'json', $context));
+        public function getSupportedTypes(?string $format = null): array
+        {
+            return [DaterangeProp::class => false];
         }
-
-        if (\array_key_exists('string', $data) && null !== $data['string']) {
-            $daterangeProp->setString($data['string']);
-        } elseif (\array_key_exists('string', $data) && null === $data['string']) {
-            $daterangeProp->setString(null);
-        }
-
-        return $daterangeProp;
     }
-
-    /**
-     * @param null|mixed $format
-     *
-     * @return array|string|int|float|bool|ArrayObject|null
-     */
-    public function normalize($object, $format = null, array $context = []): array
+} else {
+    class DaterangePropNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
     {
-        $data = [];
-        if (null !== $object->getFrom()) {
-            $data['from'] = $this->normalizer->normalize($object->getFrom(), 'json', $context);
+        use DenormalizerAwareTrait;
+        use NormalizerAwareTrait;
+        use CheckArray;
+        use ValidatorTrait;
+
+        public function supportsDenormalization($data, $type, ?string $format = null, array $context = []): bool
+        {
+            return DaterangeProp::class === $type;
         }
 
-        if (null !== $object->getTo()) {
-            $data['to'] = $this->normalizer->normalize($object->getTo(), 'json', $context);
+        public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
+        {
+            return is_object($data) && $data instanceof DaterangeProp;
         }
 
-        if (null !== $object->getString()) {
-            $data['string'] = $object->getString();
+        /**
+         * @param null|mixed $format
+         */
+        public function denormalize($data, $type, $format = null, array $context = []): Reference|DaterangeProp
+        {
+            if (isset($data['$ref'])) {
+                return new Reference($data['$ref'], $context['document-origin']);
+            }
+
+            if (isset($data['$recursiveRef'])) {
+                return new Reference($data['$recursiveRef'], $context['document-origin']);
+            }
+
+            $daterangeProp = new DaterangeProp();
+            if (null === $data || !\is_array($data)) {
+                return $daterangeProp;
+            }
+
+            if (\array_key_exists('from', $data)) {
+                $daterangeProp->setFrom($this->denormalizer->denormalize($data['from'], DaterangePropFrom::class, 'json', $context));
+                unset($data['from']);
+            }
+
+            if (\array_key_exists('to', $data)) {
+                $daterangeProp->setTo($this->denormalizer->denormalize($data['to'], DaterangePropTo::class, 'json', $context));
+                unset($data['to']);
+            }
+
+            if (\array_key_exists('string', $data) && null !== $data['string']) {
+                $daterangeProp->setString($data['string']);
+                unset($data['string']);
+            } elseif (\array_key_exists('string', $data) && null === $data['string']) {
+                $daterangeProp->setString(null);
+            }
+
+            foreach ($data as $key => $value) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $daterangeProp[$key] = $value;
+                }
+            }
+
+            return $daterangeProp;
         }
 
-        return $data;
+        /**
+         * @param null|mixed $format
+         *
+         * @return array|string|int|float|bool|\ArrayObject|null
+         */
+        public function normalize($object, $format = null, array $context = [])
+        {
+            $data = [];
+            if ($object->isInitialized('from') && null !== $object->getFrom()) {
+                $data['from'] = $this->normalizer->normalize($object->getFrom(), 'json', $context);
+            }
+
+            if ($object->isInitialized('to') && null !== $object->getTo()) {
+                $data['to'] = $this->normalizer->normalize($object->getTo(), 'json', $context);
+            }
+
+            if ($object->isInitialized('string') && null !== $object->getString()) {
+                $data['string'] = $object->getString();
+            }
+
+            foreach ($object as $key => $value) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $data[$key] = $value;
+                }
+            }
+
+            return $data;
+        }
+
+        public function getSupportedTypes(?string $format = null): array
+        {
+            return [DaterangeProp::class => false];
+        }
     }
 }

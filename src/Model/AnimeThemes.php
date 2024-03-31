@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class AnimeThemes
+class AnimeThemes extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * @var AnimeThemesData
      */
@@ -16,6 +26,7 @@ class AnimeThemes
 
     public function setData(AnimeThemesData $animeThemesData): self
     {
+        $this->initialized['data'] = true;
         $this->data = $animeThemesData;
 
         return $this;

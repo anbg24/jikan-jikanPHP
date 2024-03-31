@@ -7,6 +7,7 @@ use Jikan\JikanPHP\Model\AnimeThemes;
 use Jikan\JikanPHP\Runtime\Client\BaseEndpoint;
 use Jikan\JikanPHP\Runtime\Client\Endpoint;
 use Jikan\JikanPHP\Runtime\Client\EndpointTrait;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class GetAnimeThemes extends BaseEndpoint implements Endpoint
@@ -44,14 +45,16 @@ class GetAnimeThemes extends BaseEndpoint implements Endpoint
      *
      * @return null|AnimeThemes
      */
-    protected function transformResponseBody(string $body, int $status, SerializerInterface $serializer, ?string $contentType = null)
+    protected function transformResponseBody(ResponseInterface $response, SerializerInterface $serializer, ?string $contentType = null)
     {
-        if (!is_null($contentType) && (200 === $status && false !== mb_strpos($contentType, 'application/json'))) {
+        $statusCode = $response->getStatusCode();
+        $body = (string) $response->getBody();
+        if (!is_null($contentType) && (200 === $statusCode && false !== mb_strpos($contentType, 'application/json'))) {
             return $serializer->deserialize($body, AnimeThemes::class, 'json');
         }
 
-        if (400 === $status) {
-            throw new GetAnimeThemesBadRequestException();
+        if (400 === $statusCode) {
+            throw new GetAnimeThemesBadRequestException($response);
         }
     }
 

@@ -2,10 +2,20 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class AnimeVideosEpisodes
+class AnimeVideosEpisodes extends \ArrayObject
 {
     /**
-     * @var AnimeVideosEpisodesdataItem[]
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
+    /**
+     * @var list<AnimeVideosEpisodesdataItem>
      */
     protected $data = [];
 
@@ -15,7 +25,7 @@ class AnimeVideosEpisodes
     protected $pagination;
 
     /**
-     * @return AnimeVideosEpisodesdataItem[]
+     * @return list<AnimeVideosEpisodesdataItem>
      */
     public function getData(): array
     {
@@ -23,10 +33,11 @@ class AnimeVideosEpisodes
     }
 
     /**
-     * @param AnimeVideosEpisodesdataItem[] $data
+     * @param list<AnimeVideosEpisodesdataItem> $data
      */
     public function setData(array $data): self
     {
+        $this->initialized['data'] = true;
         $this->data = $data;
 
         return $this;
@@ -39,6 +50,7 @@ class AnimeVideosEpisodes
 
     public function setPagination(PaginationPagination $paginationPagination): self
     {
+        $this->initialized['pagination'] = true;
         $this->pagination = $paginationPagination;
 
         return $this;

@@ -2,15 +2,25 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class ClubsIdMembersGetResponse200
+class ClubsIdMembersGetResponse200 extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * @var PaginationPagination
      */
     protected $pagination;
 
     /**
-     * @var UserImages[]
+     * @var list<ClubMemberDataItem>
      */
     protected $data = [];
 
@@ -21,13 +31,14 @@ class ClubsIdMembersGetResponse200
 
     public function setPagination(PaginationPagination $paginationPagination): self
     {
+        $this->initialized['pagination'] = true;
         $this->pagination = $paginationPagination;
 
         return $this;
     }
 
     /**
-     * @return UserImages[]
+     * @return list<ClubMemberDataItem>
      */
     public function getData(): array
     {
@@ -35,10 +46,11 @@ class ClubsIdMembersGetResponse200
     }
 
     /**
-     * @param UserImages[] $data
+     * @param list<ClubMemberDataItem> $data
      */
     public function setData(array $data): self
     {
+        $this->initialized['data'] = true;
         $this->data = $data;
 
         return $this;

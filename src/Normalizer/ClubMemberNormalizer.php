@@ -2,11 +2,12 @@
 
 namespace Jikan\JikanPHP\Normalizer;
 
-use ArrayObject;
 use Jane\Component\JsonSchemaRuntime\Reference;
 use Jikan\JikanPHP\Model\ClubMember;
-use Jikan\JikanPHP\Model\UserImages;
+use Jikan\JikanPHP\Model\ClubMemberDataItem;
 use Jikan\JikanPHP\Runtime\Normalizer\CheckArray;
+use Jikan\JikanPHP\Runtime\Normalizer\ValidatorTrait;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -14,69 +15,168 @@ use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-class ClubMemberNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
-{
-    use DenormalizerAwareTrait;
-    use NormalizerAwareTrait;
-    use CheckArray;
-
-    public function supportsDenormalization($data, $type, $format = null): bool
+if (!class_exists(Kernel::class) || (Kernel::MAJOR_VERSION >= 7 || Kernel::MAJOR_VERSION === 6 && Kernel::MINOR_VERSION === 4)) {
+    class ClubMemberNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
     {
-        return ClubMember::class === $type;
-    }
+        use DenormalizerAwareTrait;
+        use NormalizerAwareTrait;
+        use CheckArray;
+        use ValidatorTrait;
 
-    public function supportsNormalization($data, $format = null): bool
-    {
-        return is_object($data) && $data instanceof ClubMember;
-    }
-
-    /**
-     * @param null|mixed $format
-     */
-    public function denormalize($data, $class, $format = null, array $context = []): Reference|ClubMember
-    {
-        if (isset($data['$ref'])) {
-            return new Reference($data['$ref'], $context['document-origin']);
+        public function supportsDenormalization(mixed $data, string $type, ?string $format = null, array $context = []): bool
+        {
+            return ClubMember::class === $type;
         }
 
-        if (isset($data['$recursiveRef'])) {
-            return new Reference($data['$recursiveRef'], $context['document-origin']);
+        public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
+        {
+            return is_object($data) && $data instanceof ClubMember;
         }
 
-        $clubMember = new ClubMember();
-        if (null === $data || !\is_array($data)) {
+        public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): mixed
+        {
+            if (isset($data['$ref'])) {
+                return new Reference($data['$ref'], $context['document-origin']);
+            }
+
+            if (isset($data['$recursiveRef'])) {
+                return new Reference($data['$recursiveRef'], $context['document-origin']);
+            }
+
+            $clubMember = new ClubMember();
+            if (null === $data || !\is_array($data)) {
+                return $clubMember;
+            }
+
+            if (\array_key_exists('data', $data)) {
+                $values = [];
+                foreach ($data['data'] as $value) {
+                    $values[] = $this->denormalizer->denormalize($value, ClubMemberDataItem::class, 'json', $context);
+                }
+
+                $clubMember->setData($values);
+                unset($data['data']);
+            }
+
+            foreach ($data as $key => $value_1) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $clubMember[$key] = $value_1;
+                }
+            }
+
             return $clubMember;
         }
 
-        if (\array_key_exists('data', $data)) {
-            $values = [];
-            foreach ($data['data'] as $value) {
-                $values[] = $this->denormalizer->denormalize($value, UserImages::class, 'json', $context);
+        public function normalize(mixed $object, ?string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
+        {
+            $data = [];
+            if ($object->isInitialized('data') && null !== $object->getData()) {
+                $values = [];
+                foreach ($object->getData() as $value) {
+                    $values[] = $this->normalizer->normalize($value, 'json', $context);
+                }
+
+                $data['data'] = $values;
             }
 
-            $clubMember->setData($values);
+            foreach ($object as $key => $value_1) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $data[$key] = $value_1;
+                }
+            }
+
+            return $data;
         }
 
-        return $clubMember;
+        public function getSupportedTypes(?string $format = null): array
+        {
+            return [ClubMember::class => false];
+        }
     }
-
-    /**
-     * @param null|mixed $format
-     *
-     * @return array|string|int|float|bool|ArrayObject|null
-     */
-    public function normalize($object, $format = null, array $context = [])
+} else {
+    class ClubMemberNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
     {
-        $data = [];
-        if (null !== $object->getData()) {
-            $values = [];
-            foreach ($object->getData() as $value) {
-                $values[] = $this->normalizer->normalize($value, 'json', $context);
-            }
+        use DenormalizerAwareTrait;
+        use NormalizerAwareTrait;
+        use CheckArray;
+        use ValidatorTrait;
 
-            $data['data'] = $values;
+        public function supportsDenormalization($data, $type, ?string $format = null, array $context = []): bool
+        {
+            return ClubMember::class === $type;
         }
 
-        return $data;
+        public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
+        {
+            return is_object($data) && $data instanceof ClubMember;
+        }
+
+        /**
+         * @param null|mixed $format
+         */
+        public function denormalize($data, $type, $format = null, array $context = []): Reference|ClubMember
+        {
+            if (isset($data['$ref'])) {
+                return new Reference($data['$ref'], $context['document-origin']);
+            }
+
+            if (isset($data['$recursiveRef'])) {
+                return new Reference($data['$recursiveRef'], $context['document-origin']);
+            }
+
+            $clubMember = new ClubMember();
+            if (null === $data || !\is_array($data)) {
+                return $clubMember;
+            }
+
+            if (\array_key_exists('data', $data)) {
+                $values = [];
+                foreach ($data['data'] as $value) {
+                    $values[] = $this->denormalizer->denormalize($value, ClubMemberDataItem::class, 'json', $context);
+                }
+
+                $clubMember->setData($values);
+                unset($data['data']);
+            }
+
+            foreach ($data as $key => $value_1) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $clubMember[$key] = $value_1;
+                }
+            }
+
+            return $clubMember;
+        }
+
+        /**
+         * @param null|mixed $format
+         *
+         * @return array|string|int|float|bool|\ArrayObject|null
+         */
+        public function normalize($object, $format = null, array $context = [])
+        {
+            $data = [];
+            if ($object->isInitialized('data') && null !== $object->getData()) {
+                $values = [];
+                foreach ($object->getData() as $value) {
+                    $values[] = $this->normalizer->normalize($value, 'json', $context);
+                }
+
+                $data['data'] = $values;
+            }
+
+            foreach ($object as $key => $value_1) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $data[$key] = $value_1;
+                }
+            }
+
+            return $data;
+        }
+
+        public function getSupportedTypes(?string $format = null): array
+        {
+            return [ClubMember::class => false];
+        }
     }
 }

@@ -2,15 +2,25 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class PicturesVariants
+class PicturesVariants extends \ArrayObject
 {
     /**
-     * @var PicturesVariantsDataItem[]
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
+    /**
+     * @var list<PicturesVariantsDataItem>
      */
     protected $data = [];
 
     /**
-     * @return PicturesVariantsDataItem[]
+     * @return list<PicturesVariantsDataItem>
      */
     public function getData(): array
     {
@@ -18,10 +28,11 @@ class PicturesVariants
     }
 
     /**
-     * @param PicturesVariantsDataItem[] $data
+     * @param list<PicturesVariantsDataItem> $data
      */
     public function setData(array $data): self
     {
+        $this->initialized['data'] = true;
         $this->data = $data;
 
         return $this;

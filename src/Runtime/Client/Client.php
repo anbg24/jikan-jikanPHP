@@ -63,7 +63,7 @@ abstract class Client
         }
 
         foreach ($endpoint->getHeaders($bodyHeaders) as $name => $value) {
-            $request = $request->withHeader($name, $value);
+            $request = $request->withHeader($name, is_bool($value) ? ($value ? 'true' : 'false') : ($value));
         }
 
         if ([] !== $endpoint->getAuthenticationScopes()) {

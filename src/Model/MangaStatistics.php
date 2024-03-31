@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class MangaStatistics
+class MangaStatistics extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * @var MangaStatisticsData
      */
@@ -16,6 +26,7 @@ class MangaStatistics
 
     public function setData(MangaStatisticsData $mangaStatisticsData): self
     {
+        $this->initialized['data'] = true;
         $this->data = $mangaStatisticsData;
 
         return $this;

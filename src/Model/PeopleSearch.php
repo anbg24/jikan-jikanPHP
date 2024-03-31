@@ -2,10 +2,20 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class PeopleSearch
+class PeopleSearch extends \ArrayObject
 {
     /**
-     * @var PeopleSearchdataItem[]
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
+    /**
+     * @var list<PeopleSearchdataItem>
      */
     protected $data = [];
 
@@ -15,7 +25,7 @@ class PeopleSearch
     protected $pagination;
 
     /**
-     * @return PeopleSearchdataItem[]
+     * @return list<PeopleSearchdataItem>
      */
     public function getData(): array
     {
@@ -23,10 +33,11 @@ class PeopleSearch
     }
 
     /**
-     * @param PeopleSearchdataItem[] $data
+     * @param list<PeopleSearchdataItem> $data
      */
     public function setData(array $data): self
     {
+        $this->initialized['data'] = true;
         $this->data = $data;
 
         return $this;
@@ -39,6 +50,7 @@ class PeopleSearch
 
     public function setPagination(PaginationPlusPagination $paginationPlusPagination): self
     {
+        $this->initialized['pagination'] = true;
         $this->pagination = $paginationPlusPagination;
 
         return $this;

@@ -2,11 +2,12 @@
 
 namespace Jikan\JikanPHP\Normalizer;
 
-use ArrayObject;
 use Jane\Component\JsonSchemaRuntime\Reference;
 use Jikan\JikanPHP\Model\EntryMeta;
 use Jikan\JikanPHP\Model\UsersTempDataItemFavorites;
 use Jikan\JikanPHP\Runtime\Normalizer\CheckArray;
+use Jikan\JikanPHP\Runtime\Normalizer\ValidatorTrait;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -14,123 +15,282 @@ use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-class UsersTempDataItemFavoritesNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
-{
-    use DenormalizerAwareTrait;
-    use NormalizerAwareTrait;
-    use CheckArray;
-
-    public function supportsDenormalization($data, $type, $format = null): bool
+if (!class_exists(Kernel::class) || (Kernel::MAJOR_VERSION >= 7 || Kernel::MAJOR_VERSION === 6 && Kernel::MINOR_VERSION === 4)) {
+    class UsersTempDataItemFavoritesNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
     {
-        return UsersTempDataItemFavorites::class === $type;
-    }
+        use DenormalizerAwareTrait;
+        use NormalizerAwareTrait;
+        use CheckArray;
+        use ValidatorTrait;
 
-    public function supportsNormalization($data, $format = null): bool
-    {
-        return is_object($data) && $data instanceof UsersTempDataItemFavorites;
-    }
-
-    /**
-     * @param null|mixed $format
-     */
-    public function denormalize($data, $class, $format = null, array $context = []): Reference|UsersTempDataItemFavorites
-    {
-        if (isset($data['$ref'])) {
-            return new Reference($data['$ref'], $context['document-origin']);
+        public function supportsDenormalization(mixed $data, string $type, ?string $format = null, array $context = []): bool
+        {
+            return UsersTempDataItemFavorites::class === $type;
         }
 
-        if (isset($data['$recursiveRef'])) {
-            return new Reference($data['$recursiveRef'], $context['document-origin']);
+        public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
+        {
+            return is_object($data) && $data instanceof UsersTempDataItemFavorites;
         }
 
-        $usersTempDataItemFavorites = new UsersTempDataItemFavorites();
-        if (null === $data || !\is_array($data)) {
+        public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): mixed
+        {
+            if (isset($data['$ref'])) {
+                return new Reference($data['$ref'], $context['document-origin']);
+            }
+
+            if (isset($data['$recursiveRef'])) {
+                return new Reference($data['$recursiveRef'], $context['document-origin']);
+            }
+
+            $usersTempDataItemFavorites = new UsersTempDataItemFavorites();
+            if (null === $data || !\is_array($data)) {
+                return $usersTempDataItemFavorites;
+            }
+
+            if (\array_key_exists('anime', $data)) {
+                $values = [];
+                foreach ($data['anime'] as $value) {
+                    $values[] = $this->denormalizer->denormalize($value, EntryMeta::class, 'json', $context);
+                }
+
+                $usersTempDataItemFavorites->setAnime($values);
+                unset($data['anime']);
+            }
+
+            if (\array_key_exists('manga', $data)) {
+                $values_1 = [];
+                foreach ($data['manga'] as $value_1) {
+                    $values_1[] = $this->denormalizer->denormalize($value_1, EntryMeta::class, 'json', $context);
+                }
+
+                $usersTempDataItemFavorites->setManga($values_1);
+                unset($data['manga']);
+            }
+
+            if (\array_key_exists('characters', $data)) {
+                $values_2 = [];
+                foreach ($data['characters'] as $value_2) {
+                    $values_2[] = $this->denormalizer->denormalize($value_2, EntryMeta::class, 'json', $context);
+                }
+
+                $usersTempDataItemFavorites->setCharacters($values_2);
+                unset($data['characters']);
+            }
+
+            if (\array_key_exists('people', $data)) {
+                $values_3 = [];
+                foreach ($data['people'] as $value_3) {
+                    $values_3[] = $this->denormalizer->denormalize($value_3, EntryMeta::class, 'json', $context);
+                }
+
+                $usersTempDataItemFavorites->setPeople($values_3);
+                unset($data['people']);
+            }
+
+            foreach ($data as $key => $value_4) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $usersTempDataItemFavorites[$key] = $value_4;
+                }
+            }
+
             return $usersTempDataItemFavorites;
         }
 
-        if (\array_key_exists('anime', $data)) {
-            $values = [];
-            foreach ($data['anime'] as $value) {
-                $values[] = $this->denormalizer->denormalize($value, EntryMeta::class, 'json', $context);
+        public function normalize(mixed $object, ?string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
+        {
+            $data = [];
+            if ($object->isInitialized('anime') && null !== $object->getAnime()) {
+                $values = [];
+                foreach ($object->getAnime() as $value) {
+                    $values[] = $this->normalizer->normalize($value, 'json', $context);
+                }
+
+                $data['anime'] = $values;
             }
 
-            $usersTempDataItemFavorites->setAnime($values);
-        }
+            if ($object->isInitialized('manga') && null !== $object->getManga()) {
+                $values_1 = [];
+                foreach ($object->getManga() as $value_1) {
+                    $values_1[] = $this->normalizer->normalize($value_1, 'json', $context);
+                }
 
-        if (\array_key_exists('manga', $data)) {
-            $values_1 = [];
-            foreach ($data['manga'] as $value_1) {
-                $values_1[] = $this->denormalizer->denormalize($value_1, EntryMeta::class, 'json', $context);
+                $data['manga'] = $values_1;
             }
 
-            $usersTempDataItemFavorites->setManga($values_1);
-        }
+            if ($object->isInitialized('characters') && null !== $object->getCharacters()) {
+                $values_2 = [];
+                foreach ($object->getCharacters() as $character) {
+                    $values_2[] = $this->normalizer->normalize($character, 'json', $context);
+                }
 
-        if (\array_key_exists('characters', $data)) {
-            $values_2 = [];
-            foreach ($data['characters'] as $value_2) {
-                $values_2[] = $this->denormalizer->denormalize($value_2, EntryMeta::class, 'json', $context);
+                $data['characters'] = $values_2;
             }
 
-            $usersTempDataItemFavorites->setCharacters($values_2);
-        }
+            if ($object->isInitialized('people') && null !== $object->getPeople()) {
+                $values_3 = [];
+                foreach ($object->getPeople() as $person) {
+                    $values_3[] = $this->normalizer->normalize($person, 'json', $context);
+                }
 
-        if (\array_key_exists('people', $data)) {
-            $values_3 = [];
-            foreach ($data['people'] as $value_3) {
-                $values_3[] = $this->denormalizer->denormalize($value_3, EntryMeta::class, 'json', $context);
+                $data['people'] = $values_3;
             }
 
-            $usersTempDataItemFavorites->setPeople($values_3);
+            foreach ($object as $key => $value_4) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $data[$key] = $value_4;
+                }
+            }
+
+            return $data;
         }
 
-        return $usersTempDataItemFavorites;
+        public function getSupportedTypes(?string $format = null): array
+        {
+            return [UsersTempDataItemFavorites::class => false];
+        }
     }
-
-    /**
-     * @param null|mixed $format
-     *
-     * @return array|string|int|float|bool|ArrayObject|null
-     */
-    public function normalize($object, $format = null, array $context = []): array
+} else {
+    class UsersTempDataItemFavoritesNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
     {
-        $data = [];
-        if (null !== $object->getAnime()) {
-            $values = [];
-            foreach ($object->getAnime() as $value) {
-                $values[] = $this->normalizer->normalize($value, 'json', $context);
-            }
+        use DenormalizerAwareTrait;
+        use NormalizerAwareTrait;
+        use CheckArray;
+        use ValidatorTrait;
 
-            $data['anime'] = $values;
+        public function supportsDenormalization($data, $type, ?string $format = null, array $context = []): bool
+        {
+            return UsersTempDataItemFavorites::class === $type;
         }
 
-        if (null !== $object->getManga()) {
-            $values_1 = [];
-            foreach ($object->getManga() as $value_1) {
-                $values_1[] = $this->normalizer->normalize($value_1, 'json', $context);
-            }
-
-            $data['manga'] = $values_1;
+        public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
+        {
+            return is_object($data) && $data instanceof UsersTempDataItemFavorites;
         }
 
-        if (null !== $object->getCharacters()) {
-            $values_2 = [];
-            foreach ($object->getCharacters() as $character) {
-                $values_2[] = $this->normalizer->normalize($character, 'json', $context);
+        /**
+         * @param null|mixed $format
+         */
+        public function denormalize($data, $type, $format = null, array $context = []): Reference|UsersTempDataItemFavorites
+        {
+            if (isset($data['$ref'])) {
+                return new Reference($data['$ref'], $context['document-origin']);
             }
 
-            $data['characters'] = $values_2;
-        }
-
-        if (null !== $object->getPeople()) {
-            $values_3 = [];
-            foreach ($object->getPeople() as $person) {
-                $values_3[] = $this->normalizer->normalize($person, 'json', $context);
+            if (isset($data['$recursiveRef'])) {
+                return new Reference($data['$recursiveRef'], $context['document-origin']);
             }
 
-            $data['people'] = $values_3;
+            $usersTempDataItemFavorites = new UsersTempDataItemFavorites();
+            if (null === $data || !\is_array($data)) {
+                return $usersTempDataItemFavorites;
+            }
+
+            if (\array_key_exists('anime', $data)) {
+                $values = [];
+                foreach ($data['anime'] as $value) {
+                    $values[] = $this->denormalizer->denormalize($value, EntryMeta::class, 'json', $context);
+                }
+
+                $usersTempDataItemFavorites->setAnime($values);
+                unset($data['anime']);
+            }
+
+            if (\array_key_exists('manga', $data)) {
+                $values_1 = [];
+                foreach ($data['manga'] as $value_1) {
+                    $values_1[] = $this->denormalizer->denormalize($value_1, EntryMeta::class, 'json', $context);
+                }
+
+                $usersTempDataItemFavorites->setManga($values_1);
+                unset($data['manga']);
+            }
+
+            if (\array_key_exists('characters', $data)) {
+                $values_2 = [];
+                foreach ($data['characters'] as $value_2) {
+                    $values_2[] = $this->denormalizer->denormalize($value_2, EntryMeta::class, 'json', $context);
+                }
+
+                $usersTempDataItemFavorites->setCharacters($values_2);
+                unset($data['characters']);
+            }
+
+            if (\array_key_exists('people', $data)) {
+                $values_3 = [];
+                foreach ($data['people'] as $value_3) {
+                    $values_3[] = $this->denormalizer->denormalize($value_3, EntryMeta::class, 'json', $context);
+                }
+
+                $usersTempDataItemFavorites->setPeople($values_3);
+                unset($data['people']);
+            }
+
+            foreach ($data as $key => $value_4) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $usersTempDataItemFavorites[$key] = $value_4;
+                }
+            }
+
+            return $usersTempDataItemFavorites;
         }
 
-        return $data;
+        /**
+         * @param null|mixed $format
+         *
+         * @return array|string|int|float|bool|\ArrayObject|null
+         */
+        public function normalize($object, $format = null, array $context = [])
+        {
+            $data = [];
+            if ($object->isInitialized('anime') && null !== $object->getAnime()) {
+                $values = [];
+                foreach ($object->getAnime() as $value) {
+                    $values[] = $this->normalizer->normalize($value, 'json', $context);
+                }
+
+                $data['anime'] = $values;
+            }
+
+            if ($object->isInitialized('manga') && null !== $object->getManga()) {
+                $values_1 = [];
+                foreach ($object->getManga() as $value_1) {
+                    $values_1[] = $this->normalizer->normalize($value_1, 'json', $context);
+                }
+
+                $data['manga'] = $values_1;
+            }
+
+            if ($object->isInitialized('characters') && null !== $object->getCharacters()) {
+                $values_2 = [];
+                foreach ($object->getCharacters() as $character) {
+                    $values_2[] = $this->normalizer->normalize($character, 'json', $context);
+                }
+
+                $data['characters'] = $values_2;
+            }
+
+            if ($object->isInitialized('people') && null !== $object->getPeople()) {
+                $values_3 = [];
+                foreach ($object->getPeople() as $person) {
+                    $values_3[] = $this->normalizer->normalize($person, 'json', $context);
+                }
+
+                $data['people'] = $values_3;
+            }
+
+            foreach ($object as $key => $value_4) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $data[$key] = $value_4;
+                }
+            }
+
+            return $data;
+        }
+
+        public function getSupportedTypes(?string $format = null): array
+        {
+            return [UsersTempDataItemFavorites::class => false];
+        }
     }
 }

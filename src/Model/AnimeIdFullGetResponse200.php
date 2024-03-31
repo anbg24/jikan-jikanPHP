@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class AnimeIdFullGetResponse200
+class AnimeIdFullGetResponse200 extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * Full anime Resource.
      *
@@ -24,6 +34,7 @@ class AnimeIdFullGetResponse200
      */
     public function setData(AnimeFull $animeFull): self
     {
+        $this->initialized['data'] = true;
         $this->data = $animeFull;
 
         return $this;

@@ -36,7 +36,8 @@
     "config": {
         "sort-packages": true,
         "allow-plugins": {
-            "phpro/grumphp": true
+            "phpro/grumphp": true,
+            "php-http/discovery": true
         }
     },
     "scripts": {

@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class Moreinfo
+class Moreinfo extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * @var MoreinfoData
      */
@@ -16,6 +26,7 @@ class Moreinfo
 
     public function setData(MoreinfoData $moreinfoData): self
     {
+        $this->initialized['data'] = true;
         $this->data = $moreinfoData;
 
         return $this;

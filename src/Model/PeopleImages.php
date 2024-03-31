@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class PeopleImages
+class PeopleImages extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * Available images in JPG.
      *
@@ -24,6 +34,7 @@ class PeopleImages
      */
     public function setJpg(PeopleImagesJpg $peopleImagesJpg): self
     {
+        $this->initialized['jpg'] = true;
         $this->jpg = $peopleImagesJpg;
 
         return $this;

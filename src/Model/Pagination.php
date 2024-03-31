@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class Pagination
+class Pagination extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * @var PaginationPagination
      */
@@ -16,6 +26,7 @@ class Pagination
 
     public function setPagination(PaginationPagination $paginationPagination): self
     {
+        $this->initialized['pagination'] = true;
         $this->pagination = $paginationPagination;
 
         return $this;

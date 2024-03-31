@@ -2,10 +2,11 @@
 
 namespace Jikan\JikanPHP\Normalizer;
 
-use ArrayObject;
 use Jane\Component\JsonSchemaRuntime\Reference;
 use Jikan\JikanPHP\Model\Broadcast;
 use Jikan\JikanPHP\Runtime\Normalizer\CheckArray;
+use Jikan\JikanPHP\Runtime\Normalizer\ValidatorTrait;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -13,91 +14,218 @@ use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-class BroadcastNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
-{
-    use DenormalizerAwareTrait;
-    use NormalizerAwareTrait;
-    use CheckArray;
-
-    public function supportsDenormalization($data, $type, $format = null): bool
+if (!class_exists(Kernel::class) || (Kernel::MAJOR_VERSION >= 7 || Kernel::MAJOR_VERSION === 6 && Kernel::MINOR_VERSION === 4)) {
+    class BroadcastNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
     {
-        return Broadcast::class === $type;
-    }
+        use DenormalizerAwareTrait;
+        use NormalizerAwareTrait;
+        use CheckArray;
+        use ValidatorTrait;
 
-    public function supportsNormalization($data, $format = null): bool
-    {
-        return is_object($data) && $data instanceof Broadcast;
-    }
-
-    /**
-     * @param null|mixed $format
-     */
-    public function denormalize($data, $class, $format = null, array $context = []): Reference|Broadcast
-    {
-        if (isset($data['$ref'])) {
-            return new Reference($data['$ref'], $context['document-origin']);
+        public function supportsDenormalization(mixed $data, string $type, ?string $format = null, array $context = []): bool
+        {
+            return Broadcast::class === $type;
         }
 
-        if (isset($data['$recursiveRef'])) {
-            return new Reference($data['$recursiveRef'], $context['document-origin']);
+        public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
+        {
+            return is_object($data) && $data instanceof Broadcast;
         }
 
-        $broadcast = new Broadcast();
-        if (null === $data || !\is_array($data)) {
+        public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): mixed
+        {
+            if (isset($data['$ref'])) {
+                return new Reference($data['$ref'], $context['document-origin']);
+            }
+
+            if (isset($data['$recursiveRef'])) {
+                return new Reference($data['$recursiveRef'], $context['document-origin']);
+            }
+
+            $broadcast = new Broadcast();
+            if (null === $data || !\is_array($data)) {
+                return $broadcast;
+            }
+
+            if (\array_key_exists('day', $data) && null !== $data['day']) {
+                $broadcast->setDay($data['day']);
+                unset($data['day']);
+            } elseif (\array_key_exists('day', $data) && null === $data['day']) {
+                $broadcast->setDay(null);
+            }
+
+            if (\array_key_exists('time', $data) && null !== $data['time']) {
+                $broadcast->setTime($data['time']);
+                unset($data['time']);
+            } elseif (\array_key_exists('time', $data) && null === $data['time']) {
+                $broadcast->setTime(null);
+            }
+
+            if (\array_key_exists('timezone', $data) && null !== $data['timezone']) {
+                $broadcast->setTimezone($data['timezone']);
+                unset($data['timezone']);
+            } elseif (\array_key_exists('timezone', $data) && null === $data['timezone']) {
+                $broadcast->setTimezone(null);
+            }
+
+            if (\array_key_exists('string', $data) && null !== $data['string']) {
+                $broadcast->setString($data['string']);
+                unset($data['string']);
+            } elseif (\array_key_exists('string', $data) && null === $data['string']) {
+                $broadcast->setString(null);
+            }
+
+            foreach ($data as $key => $value) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $broadcast[$key] = $value;
+                }
+            }
+
             return $broadcast;
         }
 
-        if (\array_key_exists('day', $data) && null !== $data['day']) {
-            $broadcast->setDay($data['day']);
-        } elseif (\array_key_exists('day', $data) && null === $data['day']) {
-            $broadcast->setDay(null);
+        public function normalize(mixed $object, ?string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
+        {
+            $data = [];
+            if ($object->isInitialized('day') && null !== $object->getDay()) {
+                $data['day'] = $object->getDay();
+            }
+
+            if ($object->isInitialized('time') && null !== $object->getTime()) {
+                $data['time'] = $object->getTime();
+            }
+
+            if ($object->isInitialized('timezone') && null !== $object->getTimezone()) {
+                $data['timezone'] = $object->getTimezone();
+            }
+
+            if ($object->isInitialized('string') && null !== $object->getString()) {
+                $data['string'] = $object->getString();
+            }
+
+            foreach ($object as $key => $value) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $data[$key] = $value;
+                }
+            }
+
+            return $data;
         }
 
-        if (\array_key_exists('time', $data) && null !== $data['time']) {
-            $broadcast->setTime($data['time']);
-        } elseif (\array_key_exists('time', $data) && null === $data['time']) {
-            $broadcast->setTime(null);
+        public function getSupportedTypes(?string $format = null): array
+        {
+            return [Broadcast::class => false];
         }
-
-        if (\array_key_exists('timezone', $data) && null !== $data['timezone']) {
-            $broadcast->setTimezone($data['timezone']);
-        } elseif (\array_key_exists('timezone', $data) && null === $data['timezone']) {
-            $broadcast->setTimezone(null);
-        }
-
-        if (\array_key_exists('string', $data) && null !== $data['string']) {
-            $broadcast->setString($data['string']);
-        } elseif (\array_key_exists('string', $data) && null === $data['string']) {
-            $broadcast->setString(null);
-        }
-
-        return $broadcast;
     }
-
-    /**
-     * @param null|mixed $format
-     *
-     * @return array|string|int|float|bool|ArrayObject|null
-     */
-    public function normalize($object, $format = null, array $context = []): array
+} else {
+    class BroadcastNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
     {
-        $data = [];
-        if (null !== $object->getDay()) {
-            $data['day'] = $object->getDay();
+        use DenormalizerAwareTrait;
+        use NormalizerAwareTrait;
+        use CheckArray;
+        use ValidatorTrait;
+
+        public function supportsDenormalization($data, $type, ?string $format = null, array $context = []): bool
+        {
+            return Broadcast::class === $type;
         }
 
-        if (null !== $object->getTime()) {
-            $data['time'] = $object->getTime();
+        public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
+        {
+            return is_object($data) && $data instanceof Broadcast;
         }
 
-        if (null !== $object->getTimezone()) {
-            $data['timezone'] = $object->getTimezone();
+        /**
+         * @param null|mixed $format
+         */
+        public function denormalize($data, $type, $format = null, array $context = []): Reference|Broadcast
+        {
+            if (isset($data['$ref'])) {
+                return new Reference($data['$ref'], $context['document-origin']);
+            }
+
+            if (isset($data['$recursiveRef'])) {
+                return new Reference($data['$recursiveRef'], $context['document-origin']);
+            }
+
+            $broadcast = new Broadcast();
+            if (null === $data || !\is_array($data)) {
+                return $broadcast;
+            }
+
+            if (\array_key_exists('day', $data) && null !== $data['day']) {
+                $broadcast->setDay($data['day']);
+                unset($data['day']);
+            } elseif (\array_key_exists('day', $data) && null === $data['day']) {
+                $broadcast->setDay(null);
+            }
+
+            if (\array_key_exists('time', $data) && null !== $data['time']) {
+                $broadcast->setTime($data['time']);
+                unset($data['time']);
+            } elseif (\array_key_exists('time', $data) && null === $data['time']) {
+                $broadcast->setTime(null);
+            }
+
+            if (\array_key_exists('timezone', $data) && null !== $data['timezone']) {
+                $broadcast->setTimezone($data['timezone']);
+                unset($data['timezone']);
+            } elseif (\array_key_exists('timezone', $data) && null === $data['timezone']) {
+                $broadcast->setTimezone(null);
+            }
+
+            if (\array_key_exists('string', $data) && null !== $data['string']) {
+                $broadcast->setString($data['string']);
+                unset($data['string']);
+            } elseif (\array_key_exists('string', $data) && null === $data['string']) {
+                $broadcast->setString(null);
+            }
+
+            foreach ($data as $key => $value) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $broadcast[$key] = $value;
+                }
+            }
+
+            return $broadcast;
         }
 
-        if (null !== $object->getString()) {
-            $data['string'] = $object->getString();
+        /**
+         * @param null|mixed $format
+         *
+         * @return array|string|int|float|bool|\ArrayObject|null
+         */
+        public function normalize($object, $format = null, array $context = [])
+        {
+            $data = [];
+            if ($object->isInitialized('day') && null !== $object->getDay()) {
+                $data['day'] = $object->getDay();
+            }
+
+            if ($object->isInitialized('time') && null !== $object->getTime()) {
+                $data['time'] = $object->getTime();
+            }
+
+            if ($object->isInitialized('timezone') && null !== $object->getTimezone()) {
+                $data['timezone'] = $object->getTimezone();
+            }
+
+            if ($object->isInitialized('string') && null !== $object->getString()) {
+                $data['string'] = $object->getString();
+            }
+
+            foreach ($object as $key => $value) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $data[$key] = $value;
+                }
+            }
+
+            return $data;
         }
 
-        return $data;
+        public function getSupportedTypes(?string $format = null): array
+        {
+            return [Broadcast::class => false];
+        }
     }
 }

@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class AnimeCharactersDataItem
+class AnimeCharactersDataItem extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * Character details.
      *
@@ -19,7 +29,7 @@ class AnimeCharactersDataItem
     protected $role;
 
     /**
-     * @var AnimeCharactersDataItemVoiceActorsItem[]
+     * @var list<AnimeCharactersDataItemVoiceActorsItem>
      */
     protected $voiceActors = [];
 
@@ -36,6 +46,7 @@ class AnimeCharactersDataItem
      */
     public function setCharacter(AnimeCharactersDataItemCharacter $animeCharactersDataItemCharacter): self
     {
+        $this->initialized['character'] = true;
         $this->character = $animeCharactersDataItemCharacter;
 
         return $this;
@@ -54,13 +65,14 @@ class AnimeCharactersDataItem
      */
     public function setRole(string $role): self
     {
+        $this->initialized['role'] = true;
         $this->role = $role;
 
         return $this;
     }
 
     /**
-     * @return AnimeCharactersDataItemVoiceActorsItem[]
+     * @return list<AnimeCharactersDataItemVoiceActorsItem>
      */
     public function getVoiceActors(): array
     {
@@ -68,10 +80,11 @@ class AnimeCharactersDataItem
     }
 
     /**
-     * @param AnimeCharactersDataItemVoiceActorsItem[] $voiceActors
+     * @param list<AnimeCharactersDataItemVoiceActorsItem> $voiceActors
      */
     public function setVoiceActors(array $voiceActors): self
     {
+        $this->initialized['voiceActors'] = true;
         $this->voiceActors = $voiceActors;
 
         return $this;

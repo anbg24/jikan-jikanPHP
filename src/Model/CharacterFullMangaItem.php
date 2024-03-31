@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class CharacterFullMangaItem
+class CharacterFullMangaItem extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * Character's Role.
      *
@@ -29,6 +39,7 @@ class CharacterFullMangaItem
      */
     public function setRole(string $role): self
     {
+        $this->initialized['role'] = true;
         $this->role = $role;
 
         return $this;
@@ -41,6 +52,7 @@ class CharacterFullMangaItem
 
     public function setManga(MangaMeta $mangaMeta): self
     {
+        $this->initialized['manga'] = true;
         $this->manga = $mangaMeta;
 
         return $this;

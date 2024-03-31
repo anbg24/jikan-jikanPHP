@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class AnimeCharactersDataItemVoiceActorsItem
+class AnimeCharactersDataItemVoiceActorsItem extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * @var AnimeCharactersDataItemVoiceActorsItemPerson
      */
@@ -21,6 +31,7 @@ class AnimeCharactersDataItemVoiceActorsItem
 
     public function setPerson(AnimeCharactersDataItemVoiceActorsItemPerson $animeCharactersDataItemVoiceActorsItemPerson): self
     {
+        $this->initialized['person'] = true;
         $this->person = $animeCharactersDataItemVoiceActorsItemPerson;
 
         return $this;
@@ -33,6 +44,7 @@ class AnimeCharactersDataItemVoiceActorsItem
 
     public function setLanguage(string $language): self
     {
+        $this->initialized['language'] = true;
         $this->language = $language;
 
         return $this;

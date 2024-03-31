@@ -2,10 +2,17 @@
 
 namespace Jikan\JikanPHP\Exception;
 
+use Psr\Http\Message\ResponseInterface;
+
 class GetRandomCharactersBadRequestException extends BadRequestException
 {
-    public function __construct()
+    public function __construct(private ?ResponseInterface $response = null)
     {
         parent::__construct('Error: Bad request. When required parameters were not supplied.');
+    }
+
+    public function getResponse(): ResponseInterface
+    {
+        return $this->response;
     }
 }

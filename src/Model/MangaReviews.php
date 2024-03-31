@@ -2,10 +2,20 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class MangaReviews
+class MangaReviews extends \ArrayObject
 {
     /**
-     * @var MangaReviewsdataItem[]
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
+    /**
+     * @var list<array<string, mixed>>
      */
     protected $data = [];
 
@@ -15,7 +25,7 @@ class MangaReviews
     protected $pagination;
 
     /**
-     * @return MangaReviewsdataItem[]
+     * @return list<array<string, mixed>>
      */
     public function getData(): array
     {
@@ -23,10 +33,11 @@ class MangaReviews
     }
 
     /**
-     * @param MangaReviewsdataItem[] $data
+     * @param list<array<string, mixed>> $data
      */
     public function setData(array $data): self
     {
+        $this->initialized['data'] = true;
         $this->data = $data;
 
         return $this;
@@ -39,6 +50,7 @@ class MangaReviews
 
     public function setPagination(PaginationPagination $paginationPagination): self
     {
+        $this->initialized['pagination'] = true;
         $this->pagination = $paginationPagination;
 
         return $this;

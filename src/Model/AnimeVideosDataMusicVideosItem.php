@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class AnimeVideosDataMusicVideosItem
+class AnimeVideosDataMusicVideosItem extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * Title.
      *
@@ -14,9 +24,9 @@ class AnimeVideosDataMusicVideosItem
     /**
      * Youtube Details.
      *
-     * @var Trailer
+     * @var array<string, mixed>
      */
-    protected $video;
+    protected $video = [];
 
     /**
      * @var AnimeVideosDataMusicVideosItemMeta
@@ -36,6 +46,7 @@ class AnimeVideosDataMusicVideosItem
      */
     public function setTitle(string $title): self
     {
+        $this->initialized['title'] = true;
         $this->title = $title;
 
         return $this;
@@ -43,18 +54,23 @@ class AnimeVideosDataMusicVideosItem
 
     /**
      * Youtube Details.
+     *
+     * @return array<string, mixed>
      */
-    public function getVideo(): Trailer
+    public function getVideo(): iterable
     {
         return $this->video;
     }
 
     /**
      * Youtube Details.
+     *
+     * @param array<string, mixed> $video
      */
-    public function setVideo(Trailer $trailer): self
+    public function setVideo(iterable $video): self
     {
-        $this->video = $trailer;
+        $this->initialized['video'] = true;
+        $this->video = $video;
 
         return $this;
     }
@@ -66,6 +82,7 @@ class AnimeVideosDataMusicVideosItem
 
     public function setMeta(AnimeVideosDataMusicVideosItemMeta $animeVideosDataMusicVideosItemMeta): self
     {
+        $this->initialized['meta'] = true;
         $this->meta = $animeVideosDataMusicVideosItemMeta;
 
         return $this;

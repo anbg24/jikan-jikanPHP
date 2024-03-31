@@ -2,15 +2,25 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class AnimeNews
+class AnimeNews extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * @var PaginationPagination
      */
     protected $pagination;
 
     /**
-     * @var NewsDataItem[]
+     * @var list<NewsDataItem>
      */
     protected $data = [];
 
@@ -21,13 +31,14 @@ class AnimeNews
 
     public function setPagination(PaginationPagination $paginationPagination): self
     {
+        $this->initialized['pagination'] = true;
         $this->pagination = $paginationPagination;
 
         return $this;
     }
 
     /**
-     * @return NewsDataItem[]
+     * @return list<NewsDataItem>
      */
     public function getData(): array
     {
@@ -35,10 +46,11 @@ class AnimeNews
     }
 
     /**
-     * @param NewsDataItem[] $data
+     * @param list<NewsDataItem> $data
      */
     public function setData(array $data): self
     {
+        $this->initialized['data'] = true;
         $this->data = $data;
 
         return $this;

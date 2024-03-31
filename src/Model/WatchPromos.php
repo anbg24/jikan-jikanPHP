@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class WatchPromos
+class WatchPromos extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * @var PaginationPagination
      */
@@ -17,7 +27,7 @@ class WatchPromos
     protected $title;
 
     /**
-     * @var object[]
+     * @var list<object>
      */
     protected $data = [];
 
@@ -28,6 +38,7 @@ class WatchPromos
 
     public function setPagination(PaginationPagination $paginationPagination): self
     {
+        $this->initialized['pagination'] = true;
         $this->pagination = $paginationPagination;
 
         return $this;
@@ -46,13 +57,14 @@ class WatchPromos
      */
     public function setTitle(string $title): self
     {
+        $this->initialized['title'] = true;
         $this->title = $title;
 
         return $this;
     }
 
     /**
-     * @return object[]
+     * @return list<object>
      */
     public function getData(): array
     {
@@ -60,10 +72,11 @@ class WatchPromos
     }
 
     /**
-     * @param object[] $data
+     * @param list<object> $data
      */
     public function setData(array $data): self
     {
+        $this->initialized['data'] = true;
         $this->data = $data;
 
         return $this;

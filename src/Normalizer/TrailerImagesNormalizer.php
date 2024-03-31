@@ -2,11 +2,12 @@
 
 namespace Jikan\JikanPHP\Normalizer;
 
-use ArrayObject;
 use Jane\Component\JsonSchemaRuntime\Reference;
 use Jikan\JikanPHP\Model\TrailerImages;
 use Jikan\JikanPHP\Model\TrailerImagesImages;
 use Jikan\JikanPHP\Runtime\Normalizer\CheckArray;
+use Jikan\JikanPHP\Runtime\Normalizer\ValidatorTrait;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -14,59 +15,148 @@ use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-class TrailerImagesNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
-{
-    use DenormalizerAwareTrait;
-    use NormalizerAwareTrait;
-    use CheckArray;
-
-    public function supportsDenormalization($data, $type, $format = null): bool
+if (!class_exists(Kernel::class) || (Kernel::MAJOR_VERSION >= 7 || Kernel::MAJOR_VERSION === 6 && Kernel::MINOR_VERSION === 4)) {
+    class TrailerImagesNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
     {
-        return TrailerImages::class === $type;
-    }
+        use DenormalizerAwareTrait;
+        use NormalizerAwareTrait;
+        use CheckArray;
+        use ValidatorTrait;
 
-    public function supportsNormalization($data, $format = null): bool
-    {
-        return is_object($data) && $data instanceof TrailerImages;
-    }
-
-    /**
-     * @param null|mixed $format
-     */
-    public function denormalize($data, $class, $format = null, array $context = []): Reference|TrailerImages
-    {
-        if (isset($data['$ref'])) {
-            return new Reference($data['$ref'], $context['document-origin']);
+        public function supportsDenormalization(mixed $data, string $type, ?string $format = null, array $context = []): bool
+        {
+            return TrailerImages::class === $type;
         }
 
-        if (isset($data['$recursiveRef'])) {
-            return new Reference($data['$recursiveRef'], $context['document-origin']);
+        public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
+        {
+            return is_object($data) && $data instanceof TrailerImages;
         }
 
-        $trailerImages = new TrailerImages();
-        if (null === $data || !\is_array($data)) {
+        public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): mixed
+        {
+            if (isset($data['$ref'])) {
+                return new Reference($data['$ref'], $context['document-origin']);
+            }
+
+            if (isset($data['$recursiveRef'])) {
+                return new Reference($data['$recursiveRef'], $context['document-origin']);
+            }
+
+            $trailerImages = new TrailerImages();
+            if (null === $data || !\is_array($data)) {
+                return $trailerImages;
+            }
+
+            if (\array_key_exists('images', $data)) {
+                $trailerImages->setImages($this->denormalizer->denormalize($data['images'], TrailerImagesImages::class, 'json', $context));
+                unset($data['images']);
+            }
+
+            foreach ($data as $key => $value) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $trailerImages[$key] = $value;
+                }
+            }
+
             return $trailerImages;
         }
 
-        if (\array_key_exists('images', $data)) {
-            $trailerImages->setImages($this->denormalizer->denormalize($data['images'], TrailerImagesImages::class, 'json', $context));
+        public function normalize(mixed $object, ?string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
+        {
+            $data = [];
+            if ($object->isInitialized('images') && null !== $object->getImages()) {
+                $data['images'] = $this->normalizer->normalize($object->getImages(), 'json', $context);
+            }
+
+            foreach ($object as $key => $value) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $data[$key] = $value;
+                }
+            }
+
+            return $data;
         }
 
-        return $trailerImages;
+        public function getSupportedTypes(?string $format = null): array
+        {
+            return [TrailerImages::class => false];
+        }
     }
-
-    /**
-     * @param null|mixed $format
-     *
-     * @return array|string|int|float|bool|ArrayObject|null
-     */
-    public function normalize($object, $format = null, array $context = []): array
+} else {
+    class TrailerImagesNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
     {
-        $data = [];
-        if (null !== $object->getImages()) {
-            $data['images'] = $this->normalizer->normalize($object->getImages(), 'json', $context);
+        use DenormalizerAwareTrait;
+        use NormalizerAwareTrait;
+        use CheckArray;
+        use ValidatorTrait;
+
+        public function supportsDenormalization($data, $type, ?string $format = null, array $context = []): bool
+        {
+            return TrailerImages::class === $type;
         }
 
-        return $data;
+        public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
+        {
+            return is_object($data) && $data instanceof TrailerImages;
+        }
+
+        /**
+         * @param null|mixed $format
+         */
+        public function denormalize($data, $type, $format = null, array $context = []): Reference|TrailerImages
+        {
+            if (isset($data['$ref'])) {
+                return new Reference($data['$ref'], $context['document-origin']);
+            }
+
+            if (isset($data['$recursiveRef'])) {
+                return new Reference($data['$recursiveRef'], $context['document-origin']);
+            }
+
+            $trailerImages = new TrailerImages();
+            if (null === $data || !\is_array($data)) {
+                return $trailerImages;
+            }
+
+            if (\array_key_exists('images', $data)) {
+                $trailerImages->setImages($this->denormalizer->denormalize($data['images'], TrailerImagesImages::class, 'json', $context));
+                unset($data['images']);
+            }
+
+            foreach ($data as $key => $value) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $trailerImages[$key] = $value;
+                }
+            }
+
+            return $trailerImages;
+        }
+
+        /**
+         * @param null|mixed $format
+         *
+         * @return array|string|int|float|bool|\ArrayObject|null
+         */
+        public function normalize($object, $format = null, array $context = [])
+        {
+            $data = [];
+            if ($object->isInitialized('images') && null !== $object->getImages()) {
+                $data['images'] = $this->normalizer->normalize($object->getImages(), 'json', $context);
+            }
+
+            foreach ($object as $key => $value) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $data[$key] = $value;
+                }
+            }
+
+            return $data;
+        }
+
+        public function getSupportedTypes(?string $format = null): array
+        {
+            return [TrailerImages::class => false];
+        }
     }
 }

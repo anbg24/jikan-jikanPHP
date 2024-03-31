@@ -2,10 +2,20 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class ClubsSearch
+class ClubsSearch extends \ArrayObject
 {
     /**
-     * @var Club[]
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
+    /**
+     * @var list<Club>
      */
     protected $data = [];
 
@@ -15,7 +25,7 @@ class ClubsSearch
     protected $pagination;
 
     /**
-     * @return Club[]
+     * @return list<Club>
      */
     public function getData(): array
     {
@@ -23,10 +33,11 @@ class ClubsSearch
     }
 
     /**
-     * @param Club[] $data
+     * @param list<Club> $data
      */
     public function setData(array $data): self
     {
+        $this->initialized['data'] = true;
         $this->data = $data;
 
         return $this;
@@ -39,6 +50,7 @@ class ClubsSearch
 
     public function setPagination(PaginationPagination $paginationPagination): self
     {
+        $this->initialized['pagination'] = true;
         $this->pagination = $paginationPagination;
 
         return $this;

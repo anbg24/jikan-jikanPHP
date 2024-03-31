@@ -2,10 +2,20 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class UserFriends
+class UserFriends extends \ArrayObject
 {
     /**
-     * @var UserFriendsdataItem[]
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
+    /**
+     * @var list<array<string, mixed>>
      */
     protected $data = [];
 
@@ -15,7 +25,7 @@ class UserFriends
     protected $pagination;
 
     /**
-     * @return UserFriendsdataItem[]
+     * @return list<array<string, mixed>>
      */
     public function getData(): array
     {
@@ -23,10 +33,11 @@ class UserFriends
     }
 
     /**
-     * @param UserFriendsdataItem[] $data
+     * @param list<array<string, mixed>> $data
      */
     public function setData(array $data): self
     {
+        $this->initialized['data'] = true;
         $this->data = $data;
 
         return $this;
@@ -39,6 +50,7 @@ class UserFriends
 
     public function setPagination(PaginationPagination $paginationPagination): self
     {
+        $this->initialized['pagination'] = true;
         $this->pagination = $paginationPagination;
 
         return $this;

@@ -2,12 +2,12 @@
 
 namespace Jikan\JikanPHP\Normalizer;
 
-use ArrayObject;
 use Jane\Component\JsonSchemaRuntime\Reference;
 use Jikan\JikanPHP\Model\MangaReviews;
-use Jikan\JikanPHP\Model\MangaReviewsdataItem;
 use Jikan\JikanPHP\Model\PaginationPagination;
 use Jikan\JikanPHP\Runtime\Normalizer\CheckArray;
+use Jikan\JikanPHP\Runtime\Normalizer\ValidatorTrait;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -15,77 +15,206 @@ use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-class MangaReviewsNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
-{
-    use DenormalizerAwareTrait;
-    use NormalizerAwareTrait;
-    use CheckArray;
-
-    public function supportsDenormalization($data, $type, $format = null): bool
+if (!class_exists(Kernel::class) || (Kernel::MAJOR_VERSION >= 7 || Kernel::MAJOR_VERSION === 6 && Kernel::MINOR_VERSION === 4)) {
+    class MangaReviewsNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
     {
-        return MangaReviews::class === $type;
-    }
+        use DenormalizerAwareTrait;
+        use NormalizerAwareTrait;
+        use CheckArray;
+        use ValidatorTrait;
 
-    public function supportsNormalization($data, $format = null): bool
-    {
-        return is_object($data) && $data instanceof MangaReviews;
-    }
-
-    /**
-     * @param null|mixed $format
-     */
-    public function denormalize($data, $class, $format = null, array $context = []): Reference|MangaReviews
-    {
-        if (isset($data['$ref'])) {
-            return new Reference($data['$ref'], $context['document-origin']);
+        public function supportsDenormalization(mixed $data, string $type, ?string $format = null, array $context = []): bool
+        {
+            return MangaReviews::class === $type;
         }
 
-        if (isset($data['$recursiveRef'])) {
-            return new Reference($data['$recursiveRef'], $context['document-origin']);
+        public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
+        {
+            return is_object($data) && $data instanceof MangaReviews;
         }
 
-        $mangaReviews = new MangaReviews();
-        if (null === $data || !\is_array($data)) {
+        public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): mixed
+        {
+            if (isset($data['$ref'])) {
+                return new Reference($data['$ref'], $context['document-origin']);
+            }
+
+            if (isset($data['$recursiveRef'])) {
+                return new Reference($data['$recursiveRef'], $context['document-origin']);
+            }
+
+            $mangaReviews = new MangaReviews();
+            if (null === $data || !\is_array($data)) {
+                return $mangaReviews;
+            }
+
+            if (\array_key_exists('data', $data)) {
+                $values = [];
+                foreach ($data['data'] as $value) {
+                    $values_1 = new \ArrayObject([], \ArrayObject::ARRAY_AS_PROPS);
+                    foreach ($value as $key => $value_1) {
+                        $values_1[$key] = $value_1;
+                    }
+
+                    $values[] = $values_1;
+                }
+
+                $mangaReviews->setData($values);
+                unset($data['data']);
+            }
+
+            if (\array_key_exists('pagination', $data)) {
+                $mangaReviews->setPagination($this->denormalizer->denormalize($data['pagination'], PaginationPagination::class, 'json', $context));
+                unset($data['pagination']);
+            }
+
+            foreach ($data as $key_1 => $value_2) {
+                if (preg_match('#.*#', (string) $key_1)) {
+                    $mangaReviews[$key_1] = $value_2;
+                }
+            }
+
             return $mangaReviews;
         }
 
-        if (\array_key_exists('data', $data)) {
-            $values = [];
-            foreach ($data['data'] as $value) {
-                $values[] = $this->denormalizer->denormalize($value, MangaReviewsdataItem::class, 'json', $context);
+        public function normalize(mixed $object, ?string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
+        {
+            $data = [];
+            if ($object->isInitialized('data') && null !== $object->getData()) {
+                $values = [];
+                foreach ($object->getData() as $value) {
+                    $values_1 = [];
+                    foreach ($value as $key => $value_1) {
+                        $values_1[$key] = $value_1;
+                    }
+
+                    $values[] = $values_1;
+                }
+
+                $data['data'] = $values;
             }
 
-            $mangaReviews->setData($values);
+            if ($object->isInitialized('pagination') && null !== $object->getPagination()) {
+                $data['pagination'] = $this->normalizer->normalize($object->getPagination(), 'json', $context);
+            }
+
+            foreach ($object as $key_1 => $value_2) {
+                if (preg_match('#.*#', (string) $key_1)) {
+                    $data[$key_1] = $value_2;
+                }
+            }
+
+            return $data;
         }
 
-        if (\array_key_exists('pagination', $data)) {
-            $mangaReviews->setPagination($this->denormalizer->denormalize($data['pagination'], PaginationPagination::class, 'json', $context));
+        public function getSupportedTypes(?string $format = null): array
+        {
+            return [MangaReviews::class => false];
         }
-
-        return $mangaReviews;
     }
-
-    /**
-     * @param null|mixed $format
-     *
-     * @return array|string|int|float|bool|ArrayObject|null
-     */
-    public function normalize($object, $format = null, array $context = []): array
+} else {
+    class MangaReviewsNormalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
     {
-        $data = [];
-        if (null !== $object->getData()) {
-            $values = [];
-            foreach ($object->getData() as $value) {
-                $values[] = $this->normalizer->normalize($value, 'json', $context);
+        use DenormalizerAwareTrait;
+        use NormalizerAwareTrait;
+        use CheckArray;
+        use ValidatorTrait;
+
+        public function supportsDenormalization($data, $type, ?string $format = null, array $context = []): bool
+        {
+            return MangaReviews::class === $type;
+        }
+
+        public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
+        {
+            return is_object($data) && $data instanceof MangaReviews;
+        }
+
+        /**
+         * @param null|mixed $format
+         */
+        public function denormalize($data, $type, $format = null, array $context = []): Reference|MangaReviews
+        {
+            if (isset($data['$ref'])) {
+                return new Reference($data['$ref'], $context['document-origin']);
             }
 
-            $data['data'] = $values;
+            if (isset($data['$recursiveRef'])) {
+                return new Reference($data['$recursiveRef'], $context['document-origin']);
+            }
+
+            $mangaReviews = new MangaReviews();
+            if (null === $data || !\is_array($data)) {
+                return $mangaReviews;
+            }
+
+            if (\array_key_exists('data', $data)) {
+                $values = [];
+                foreach ($data['data'] as $value) {
+                    $values_1 = new \ArrayObject([], \ArrayObject::ARRAY_AS_PROPS);
+                    foreach ($value as $key => $value_1) {
+                        $values_1[$key] = $value_1;
+                    }
+
+                    $values[] = $values_1;
+                }
+
+                $mangaReviews->setData($values);
+                unset($data['data']);
+            }
+
+            if (\array_key_exists('pagination', $data)) {
+                $mangaReviews->setPagination($this->denormalizer->denormalize($data['pagination'], PaginationPagination::class, 'json', $context));
+                unset($data['pagination']);
+            }
+
+            foreach ($data as $key_1 => $value_2) {
+                if (preg_match('#.*#', (string) $key_1)) {
+                    $mangaReviews[$key_1] = $value_2;
+                }
+            }
+
+            return $mangaReviews;
         }
 
-        if (null !== $object->getPagination()) {
-            $data['pagination'] = $this->normalizer->normalize($object->getPagination(), 'json', $context);
+        /**
+         * @param null|mixed $format
+         *
+         * @return array|string|int|float|bool|\ArrayObject|null
+         */
+        public function normalize($object, $format = null, array $context = [])
+        {
+            $data = [];
+            if ($object->isInitialized('data') && null !== $object->getData()) {
+                $values = [];
+                foreach ($object->getData() as $value) {
+                    $values_1 = [];
+                    foreach ($value as $key => $value_1) {
+                        $values_1[$key] = $value_1;
+                    }
+
+                    $values[] = $values_1;
+                }
+
+                $data['data'] = $values;
+            }
+
+            if ($object->isInitialized('pagination') && null !== $object->getPagination()) {
+                $data['pagination'] = $this->normalizer->normalize($object->getPagination(), 'json', $context);
+            }
+
+            foreach ($object as $key_1 => $value_2) {
+                if (preg_match('#.*#', (string) $key_1)) {
+                    $data[$key_1] = $value_2;
+                }
+            }
+
+            return $data;
         }
 
-        return $data;
+        public function getSupportedTypes(?string $format = null): array
+        {
+            return [MangaReviews::class => false];
+        }
     }
 }

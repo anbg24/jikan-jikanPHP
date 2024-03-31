@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class CommonImages
+class CommonImages extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * Available images in JPG.
      *
@@ -24,6 +34,7 @@ class CommonImages
      */
     public function setJpg(CommonImagesJpg $commonImagesJpg): self
     {
+        $this->initialized['jpg'] = true;
         $this->jpg = $commonImagesJpg;
 
         return $this;

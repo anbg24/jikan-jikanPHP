@@ -2,11 +2,12 @@
 
 namespace Jikan\JikanPHP\Normalizer;
 
-use ArrayObject;
 use Jane\Component\JsonSchemaRuntime\Reference;
 use Jikan\JikanPHP\Model\AnimeIdRelationsGetResponse200;
 use Jikan\JikanPHP\Model\Relation;
 use Jikan\JikanPHP\Runtime\Normalizer\CheckArray;
+use Jikan\JikanPHP\Runtime\Normalizer\ValidatorTrait;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -14,69 +15,168 @@ use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-class AnimeIdRelationsGetResponse200Normalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
-{
-    use DenormalizerAwareTrait;
-    use NormalizerAwareTrait;
-    use CheckArray;
-
-    public function supportsDenormalization($data, $type, $format = null): bool
+if (!class_exists(Kernel::class) || (Kernel::MAJOR_VERSION >= 7 || Kernel::MAJOR_VERSION === 6 && Kernel::MINOR_VERSION === 4)) {
+    class AnimeIdRelationsGetResponse200Normalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
     {
-        return AnimeIdRelationsGetResponse200::class === $type;
-    }
+        use DenormalizerAwareTrait;
+        use NormalizerAwareTrait;
+        use CheckArray;
+        use ValidatorTrait;
 
-    public function supportsNormalization($data, $format = null): bool
-    {
-        return is_object($data) && $data instanceof AnimeIdRelationsGetResponse200;
-    }
-
-    /**
-     * @param null|mixed $format
-     */
-    public function denormalize($data, $class, $format = null, array $context = []): Reference|AnimeIdRelationsGetResponse200
-    {
-        if (isset($data['$ref'])) {
-            return new Reference($data['$ref'], $context['document-origin']);
+        public function supportsDenormalization(mixed $data, string $type, ?string $format = null, array $context = []): bool
+        {
+            return AnimeIdRelationsGetResponse200::class === $type;
         }
 
-        if (isset($data['$recursiveRef'])) {
-            return new Reference($data['$recursiveRef'], $context['document-origin']);
+        public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
+        {
+            return is_object($data) && $data instanceof AnimeIdRelationsGetResponse200;
         }
 
-        $animeIdRelationsGetResponse200 = new AnimeIdRelationsGetResponse200();
-        if (null === $data || !\is_array($data)) {
+        public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): mixed
+        {
+            if (isset($data['$ref'])) {
+                return new Reference($data['$ref'], $context['document-origin']);
+            }
+
+            if (isset($data['$recursiveRef'])) {
+                return new Reference($data['$recursiveRef'], $context['document-origin']);
+            }
+
+            $animeIdRelationsGetResponse200 = new AnimeIdRelationsGetResponse200();
+            if (null === $data || !\is_array($data)) {
+                return $animeIdRelationsGetResponse200;
+            }
+
+            if (\array_key_exists('data', $data)) {
+                $values = [];
+                foreach ($data['data'] as $value) {
+                    $values[] = $this->denormalizer->denormalize($value, Relation::class, 'json', $context);
+                }
+
+                $animeIdRelationsGetResponse200->setData($values);
+                unset($data['data']);
+            }
+
+            foreach ($data as $key => $value_1) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $animeIdRelationsGetResponse200[$key] = $value_1;
+                }
+            }
+
             return $animeIdRelationsGetResponse200;
         }
 
-        if (\array_key_exists('data', $data)) {
-            $values = [];
-            foreach ($data['data'] as $value) {
-                $values[] = $this->denormalizer->denormalize($value, Relation::class, 'json', $context);
+        public function normalize(mixed $object, ?string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
+        {
+            $data = [];
+            if ($object->isInitialized('data') && null !== $object->getData()) {
+                $values = [];
+                foreach ($object->getData() as $value) {
+                    $values[] = $this->normalizer->normalize($value, 'json', $context);
+                }
+
+                $data['data'] = $values;
             }
 
-            $animeIdRelationsGetResponse200->setData($values);
+            foreach ($object as $key => $value_1) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $data[$key] = $value_1;
+                }
+            }
+
+            return $data;
         }
 
-        return $animeIdRelationsGetResponse200;
+        public function getSupportedTypes(?string $format = null): array
+        {
+            return [AnimeIdRelationsGetResponse200::class => false];
+        }
     }
-
-    /**
-     * @param null|mixed $format
-     *
-     * @return array|string|int|float|bool|ArrayObject|null
-     */
-    public function normalize($object, $format = null, array $context = [])
+} else {
+    class AnimeIdRelationsGetResponse200Normalizer implements DenormalizerInterface, NormalizerInterface, DenormalizerAwareInterface, NormalizerAwareInterface
     {
-        $data = [];
-        if (null !== $object->getData()) {
-            $values = [];
-            foreach ($object->getData() as $value) {
-                $values[] = $this->normalizer->normalize($value, 'json', $context);
-            }
+        use DenormalizerAwareTrait;
+        use NormalizerAwareTrait;
+        use CheckArray;
+        use ValidatorTrait;
 
-            $data['data'] = $values;
+        public function supportsDenormalization($data, $type, ?string $format = null, array $context = []): bool
+        {
+            return AnimeIdRelationsGetResponse200::class === $type;
         }
 
-        return $data;
+        public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
+        {
+            return is_object($data) && $data instanceof AnimeIdRelationsGetResponse200;
+        }
+
+        /**
+         * @param null|mixed $format
+         */
+        public function denormalize($data, $type, $format = null, array $context = []): Reference|AnimeIdRelationsGetResponse200
+        {
+            if (isset($data['$ref'])) {
+                return new Reference($data['$ref'], $context['document-origin']);
+            }
+
+            if (isset($data['$recursiveRef'])) {
+                return new Reference($data['$recursiveRef'], $context['document-origin']);
+            }
+
+            $animeIdRelationsGetResponse200 = new AnimeIdRelationsGetResponse200();
+            if (null === $data || !\is_array($data)) {
+                return $animeIdRelationsGetResponse200;
+            }
+
+            if (\array_key_exists('data', $data)) {
+                $values = [];
+                foreach ($data['data'] as $value) {
+                    $values[] = $this->denormalizer->denormalize($value, Relation::class, 'json', $context);
+                }
+
+                $animeIdRelationsGetResponse200->setData($values);
+                unset($data['data']);
+            }
+
+            foreach ($data as $key => $value_1) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $animeIdRelationsGetResponse200[$key] = $value_1;
+                }
+            }
+
+            return $animeIdRelationsGetResponse200;
+        }
+
+        /**
+         * @param null|mixed $format
+         *
+         * @return array|string|int|float|bool|\ArrayObject|null
+         */
+        public function normalize($object, $format = null, array $context = [])
+        {
+            $data = [];
+            if ($object->isInitialized('data') && null !== $object->getData()) {
+                $values = [];
+                foreach ($object->getData() as $value) {
+                    $values[] = $this->normalizer->normalize($value, 'json', $context);
+                }
+
+                $data['data'] = $values;
+            }
+
+            foreach ($object as $key => $value_1) {
+                if (preg_match('#.*#', (string) $key)) {
+                    $data[$key] = $value_1;
+                }
+            }
+
+            return $data;
+        }
+
+        public function getSupportedTypes(?string $format = null): array
+        {
+            return [AnimeIdRelationsGetResponse200::class => false];
+        }
     }
 }

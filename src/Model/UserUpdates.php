@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class UserUpdates
+class UserUpdates extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * @var UserUpdatesData
      */
@@ -16,6 +26,7 @@ class UserUpdates
 
     public function setData(UserUpdatesData $userUpdatesData): self
     {
+        $this->initialized['data'] = true;
         $this->data = $userUpdatesData;
 
         return $this;

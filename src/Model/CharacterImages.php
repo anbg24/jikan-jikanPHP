@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class CharacterImages
+class CharacterImages extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * Available images in JPG.
      *
@@ -31,6 +41,7 @@ class CharacterImages
      */
     public function setJpg(CharacterImagesJpg $characterImagesJpg): self
     {
+        $this->initialized['jpg'] = true;
         $this->jpg = $characterImagesJpg;
 
         return $this;
@@ -49,6 +60,7 @@ class CharacterImages
      */
     public function setWebp(CharacterImagesWebp $characterImagesWebp): self
     {
+        $this->initialized['webp'] = true;
         $this->webp = $characterImagesWebp;
 
         return $this;

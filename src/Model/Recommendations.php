@@ -2,10 +2,20 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class Recommendations
+class Recommendations extends \ArrayObject
 {
     /**
-     * @var RecommendationsdataItem[]
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
+    /**
+     * @var list<RecommendationsdataItem>
      */
     protected $data = [];
 
@@ -15,7 +25,7 @@ class Recommendations
     protected $pagination;
 
     /**
-     * @return RecommendationsdataItem[]
+     * @return list<RecommendationsdataItem>
      */
     public function getData(): array
     {
@@ -23,10 +33,11 @@ class Recommendations
     }
 
     /**
-     * @param RecommendationsdataItem[] $data
+     * @param list<RecommendationsdataItem> $data
      */
     public function setData(array $data): self
     {
+        $this->initialized['data'] = true;
         $this->data = $data;
 
         return $this;
@@ -39,6 +50,7 @@ class Recommendations
 
     public function setPagination(PaginationPagination $paginationPagination): self
     {
+        $this->initialized['pagination'] = true;
         $this->pagination = $paginationPagination;
 
         return $this;

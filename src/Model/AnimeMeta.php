@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class AnimeMeta
+class AnimeMeta extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * MyAnimeList ID.
      *
@@ -43,6 +53,7 @@ class AnimeMeta
      */
     public function setMalId(int $malId): self
     {
+        $this->initialized['malId'] = true;
         $this->malId = $malId;
 
         return $this;
@@ -61,6 +72,7 @@ class AnimeMeta
      */
     public function setUrl(string $url): self
     {
+        $this->initialized['url'] = true;
         $this->url = $url;
 
         return $this;
@@ -73,6 +85,7 @@ class AnimeMeta
 
     public function setImages(AnimeImages $animeImages): self
     {
+        $this->initialized['images'] = true;
         $this->images = $animeImages;
 
         return $this;
@@ -91,6 +104,7 @@ class AnimeMeta
      */
     public function setTitle(string $title): self
     {
+        $this->initialized['title'] = true;
         $this->title = $title;
 
         return $this;

@@ -14,4 +14,13 @@ class ClientTest extends TestCase
         $anime = $response->getData();
         self::assertEquals('Fullmetal Alchemist: Brotherhood', $anime->getTitle());
     }
+
+    public function test_it_gets_anim2(): void
+    {
+        $jikan = Client::create();
+        /** @var AnimeIdGetResponse200 $response */
+        $response = $jikan->getAnimeById(5114);
+        $anime = $response->getData();
+        self::assertEquals(5114, $anime->getMalId());
+    }
 }

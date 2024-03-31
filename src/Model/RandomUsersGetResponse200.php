@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class RandomUsersGetResponse200
+class RandomUsersGetResponse200 extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * @var UserProfile
      */
@@ -16,6 +26,7 @@ class RandomUsersGetResponse200
 
     public function setData(UserProfile $userProfile): self
     {
+        $this->initialized['data'] = true;
         $this->data = $userProfile;
 
         return $this;

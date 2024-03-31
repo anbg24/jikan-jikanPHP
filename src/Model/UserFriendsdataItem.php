@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class UserFriendsdataItem
+class UserFriendsdataItem extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * @var UserMeta
      */
@@ -30,6 +40,7 @@ class UserFriendsdataItem
 
     public function setUser(UserMeta $userMeta): self
     {
+        $this->initialized['user'] = true;
         $this->user = $userMeta;
 
         return $this;
@@ -48,6 +59,7 @@ class UserFriendsdataItem
      */
     public function setLastOnline(string $lastOnline): self
     {
+        $this->initialized['lastOnline'] = true;
         $this->lastOnline = $lastOnline;
 
         return $this;
@@ -66,6 +78,7 @@ class UserFriendsdataItem
      */
     public function setFriendsSince(string $friendsSince): self
     {
+        $this->initialized['friendsSince'] = true;
         $this->friendsSince = $friendsSince;
 
         return $this;

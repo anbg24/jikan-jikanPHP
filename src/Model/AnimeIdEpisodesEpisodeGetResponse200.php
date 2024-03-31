@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class AnimeIdEpisodesEpisodeGetResponse200
+class AnimeIdEpisodesEpisodeGetResponse200 extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * Anime Episode Resource.
      *
@@ -24,6 +34,7 @@ class AnimeIdEpisodesEpisodeGetResponse200
      */
     public function setData(AnimeEpisode $animeEpisode): self
     {
+        $this->initialized['data'] = true;
         $this->data = $animeEpisode;
 
         return $this;

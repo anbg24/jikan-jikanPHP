@@ -12,6 +12,7 @@ grumphp:
                 - src/Runtime/Client/BaseEndpoint.php
             metadata:
                 priority: 200
+            memory_limit: 1024M
         phpcsfixer2:
             allow_risky: true
             cache_file: ~

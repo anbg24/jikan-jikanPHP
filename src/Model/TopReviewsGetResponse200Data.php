@@ -2,10 +2,20 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class TopReviewsGetResponse200Data
+class TopReviewsGetResponse200Data extends \ArrayObject
 {
     /**
-     * @var mixed[]
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
+    /**
+     * @var list<mixed>
      */
     protected $data = [];
 
@@ -15,7 +25,7 @@ class TopReviewsGetResponse200Data
     protected $pagination;
 
     /**
-     * @return mixed[]
+     * @return list<mixed>
      */
     public function getData(): array
     {
@@ -23,10 +33,11 @@ class TopReviewsGetResponse200Data
     }
 
     /**
-     * @param mixed[] $data
+     * @param list<mixed> $data
      */
     public function setData(array $data): self
     {
+        $this->initialized['data'] = true;
         $this->data = $data;
 
         return $this;
@@ -39,6 +50,7 @@ class TopReviewsGetResponse200Data
 
     public function setPagination(PaginationPagination $paginationPagination): self
     {
+        $this->initialized['pagination'] = true;
         $this->pagination = $paginationPagination;
 
         return $this;

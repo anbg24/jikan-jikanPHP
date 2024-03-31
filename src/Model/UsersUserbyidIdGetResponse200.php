@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class UsersUserbyidIdGetResponse200
+class UsersUserbyidIdGetResponse200 extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * User Meta By ID.
      *
@@ -24,6 +34,7 @@ class UsersUserbyidIdGetResponse200
      */
     public function setData(UserById $userById): self
     {
+        $this->initialized['data'] = true;
         $this->data = $userById;
 
         return $this;

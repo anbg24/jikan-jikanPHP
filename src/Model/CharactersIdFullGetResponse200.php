@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class CharactersIdFullGetResponse200
+class CharactersIdFullGetResponse200 extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * Character Resource.
      *
@@ -24,6 +34,7 @@ class CharactersIdFullGetResponse200
      */
     public function setData(CharacterFull $characterFull): self
     {
+        $this->initialized['data'] = true;
         $this->data = $characterFull;
 
         return $this;

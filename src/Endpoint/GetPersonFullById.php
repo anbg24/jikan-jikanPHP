@@ -7,6 +7,7 @@ use Jikan\JikanPHP\Model\PeopleIdFullGetResponse200;
 use Jikan\JikanPHP\Runtime\Client\BaseEndpoint;
 use Jikan\JikanPHP\Runtime\Client\Endpoint;
 use Jikan\JikanPHP\Runtime\Client\EndpointTrait;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class GetPersonFullById extends BaseEndpoint implements Endpoint
@@ -44,14 +45,16 @@ class GetPersonFullById extends BaseEndpoint implements Endpoint
      *
      * @return null|PeopleIdFullGetResponse200
      */
-    protected function transformResponseBody(string $body, int $status, SerializerInterface $serializer, ?string $contentType = null)
+    protected function transformResponseBody(ResponseInterface $response, SerializerInterface $serializer, ?string $contentType = null)
     {
-        if (!is_null($contentType) && (200 === $status && false !== mb_strpos($contentType, 'application/json'))) {
+        $statusCode = $response->getStatusCode();
+        $body = (string) $response->getBody();
+        if (!is_null($contentType) && (200 === $statusCode && false !== mb_strpos($contentType, 'application/json'))) {
             return $serializer->deserialize($body, PeopleIdFullGetResponse200::class, 'json');
         }
 
-        if (400 === $status) {
-            throw new GetPersonFullByIdBadRequestException();
+        if (400 === $statusCode) {
+            throw new GetPersonFullByIdBadRequestException($response);
         }
     }
 

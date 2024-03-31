@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class PicturesDataItem
+class PicturesDataItem extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * @var AnimeImages
      */
@@ -16,6 +26,7 @@ class PicturesDataItem
 
     public function setImages(AnimeImages $animeImages): self
     {
+        $this->initialized['images'] = true;
         $this->images = $animeImages;
 
         return $this;

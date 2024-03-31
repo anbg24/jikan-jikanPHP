@@ -2,10 +2,20 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class Schedules
+class Schedules extends \ArrayObject
 {
     /**
-     * @var Anime[]
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
+    /**
+     * @var list<Anime>
      */
     protected $data = [];
 
@@ -15,7 +25,7 @@ class Schedules
     protected $pagination;
 
     /**
-     * @return Anime[]
+     * @return list<Anime>
      */
     public function getData(): array
     {
@@ -23,10 +33,11 @@ class Schedules
     }
 
     /**
-     * @param Anime[] $data
+     * @param list<Anime> $data
      */
     public function setData(array $data): self
     {
+        $this->initialized['data'] = true;
         $this->data = $data;
 
         return $this;
@@ -39,6 +50,7 @@ class Schedules
 
     public function setPagination(PaginationPlusPagination $paginationPlusPagination): self
     {
+        $this->initialized['pagination'] = true;
         $this->pagination = $paginationPlusPagination;
 
         return $this;

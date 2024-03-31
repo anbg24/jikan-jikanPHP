@@ -2,8 +2,18 @@
 
 namespace Jikan\JikanPHP\Model;
 
-class WatchEpisodesdataItem
+class WatchEpisodesdataItem extends \ArrayObject
 {
+    /**
+     * @var array
+     */
+    protected $initialized = [];
+
+    public function isInitialized($property): bool
+    {
+        return array_key_exists($property, $this->initialized);
+    }
+
     /**
      * @var AnimeMeta
      */
@@ -12,7 +22,7 @@ class WatchEpisodesdataItem
     /**
      * Recent Episodes (max 2 listed).
      *
-     * @var WatchEpisodesdataItemEpisodesItem[]
+     * @var list<WatchEpisodesdataItemEpisodesItem>
      */
     protected $episodes = [];
 
@@ -30,6 +40,7 @@ class WatchEpisodesdataItem
 
     public function setEntry(AnimeMeta $animeMeta): self
     {
+        $this->initialized['entry'] = true;
         $this->entry = $animeMeta;
 
         return $this;
@@ -38,7 +49,7 @@ class WatchEpisodesdataItem
     /**
      * Recent Episodes (max 2 listed).
      *
-     * @return WatchEpisodesdataItemEpisodesItem[]
+     * @return list<WatchEpisodesdataItemEpisodesItem>
      */
     public function getEpisodes(): array
     {
@@ -48,10 +59,11 @@ class WatchEpisodesdataItem
     /**
      * Recent Episodes (max 2 listed).
      *
-     * @param WatchEpisodesdataItemEpisodesItem[] $episodes
+     * @param list<WatchEpisodesdataItemEpisodesItem> $episodes
      */
     public function setEpisodes(array $episodes): self
     {
+        $this->initialized['episodes'] = true;
         $this->episodes = $episodes;
 
         return $this;
@@ -70,6 +82,7 @@ class WatchEpisodesdataItem
      */
     public function setRegionLocked(bool $regionLocked): self
     {
+        $this->initialized['regionLocked'] = true;
         $this->regionLocked = $regionLocked;
 
         return $this;

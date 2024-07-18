@@ -23,4 +23,13 @@ class ClientTest extends TestCase
         $anime = $response->getData();
         self::assertEquals(5114, $anime->getMalId());
     }
+
+    public function test_it_gets_anim3(): void
+    {
+        $jikan = Client::create();
+        /** @var AnimeIdGetResponse200 $response */
+        $response = $jikan->getAnimeById(49817);
+        $anime = $response->getData();
+        self::assertEquals(49817, $anime->getMalId());
+    }
 }

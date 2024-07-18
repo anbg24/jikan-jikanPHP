@@ -337,7 +337,7 @@ if (!class_exists(Kernel::class) || (Kernel::MAJOR_VERSION >= 7 || Kernel::MAJOR
                 unset($data['theme']);
             }
 
-            if (\array_key_exists('external', $data)) {
+            if (\array_key_exists('external', $data) && null !== $data['external']) {
                 $values_10 = [];
                 foreach ($data['external'] as $value_10) {
                     $values_10[] = $this->denormalizer->denormalize($value_10, AnimeFullExternalItem::class, 'json', $context);
@@ -345,6 +345,8 @@ if (!class_exists(Kernel::class) || (Kernel::MAJOR_VERSION >= 7 || Kernel::MAJOR
 
                 $animeFull->setExternal($values_10);
                 unset($data['external']);
+            } elseif (\array_key_exists('external', $data) && null === $data['external']) {
+                $animeFull->setExternal(null);
             }
 
             if (\array_key_exists('streaming', $data)) {
@@ -919,7 +921,7 @@ if (!class_exists(Kernel::class) || (Kernel::MAJOR_VERSION >= 7 || Kernel::MAJOR
                 unset($data['theme']);
             }
 
-            if (\array_key_exists('external', $data)) {
+            if (\array_key_exists('external', $data) && null !== $data['external']) {
                 $values_10 = [];
                 foreach ($data['external'] as $value_10) {
                     $values_10[] = $this->denormalizer->denormalize($value_10, AnimeFullExternalItem::class, 'json', $context);
@@ -927,6 +929,8 @@ if (!class_exists(Kernel::class) || (Kernel::MAJOR_VERSION >= 7 || Kernel::MAJOR
 
                 $animeFull->setExternal($values_10);
                 unset($data['external']);
+            } elseif (\array_key_exists('external', $data) && null === $data['external']) {
+                $animeFull->setExternal(null);
             }
 
             if (\array_key_exists('streaming', $data)) {

@@ -269,9 +269,9 @@ class AnimeFull extends \ArrayObject
     protected $theme;
 
     /**
-     * @var list<AnimeFullExternalItem>
+     * @var list<AnimeFullExternalItem>|null
      */
-    protected $external = [];
+    protected $external;
 
     /**
      * @var list<AnimeFullStreamingItem>
@@ -1013,17 +1013,17 @@ class AnimeFull extends \ArrayObject
     }
 
     /**
-     * @return list<AnimeFullExternalItem>
+     * @return list<AnimeFullExternalItem>|null
      */
-    public function getExternal(): array
+    public function getExternal(): ?array
     {
         return $this->external;
     }
 
     /**
-     * @param list<AnimeFullExternalItem> $external
+     * @param list<AnimeFullExternalItem>|null $external
      */
-    public function setExternal(array $external): self
+    public function setExternal(?array $external): self
     {
         $this->initialized['external'] = true;
         $this->external = $external;

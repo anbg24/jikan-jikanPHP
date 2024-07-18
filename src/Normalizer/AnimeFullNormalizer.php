@@ -349,7 +349,7 @@ if (!class_exists(Kernel::class) || (Kernel::MAJOR_VERSION >= 7 || Kernel::MAJOR
                 $animeFull->setExternal(null);
             }
 
-            if (\array_key_exists('streaming', $data)) {
+            if (\array_key_exists('streaming', $data) && null !== $data['streaming']) {
                 $values_11 = [];
                 foreach ($data['streaming'] as $value_11) {
                     $values_11[] = $this->denormalizer->denormalize($value_11, AnimeFullStreamingItem::class, 'json', $context);
@@ -357,6 +357,8 @@ if (!class_exists(Kernel::class) || (Kernel::MAJOR_VERSION >= 7 || Kernel::MAJOR
 
                 $animeFull->setStreaming($values_11);
                 unset($data['streaming']);
+            } elseif (\array_key_exists('streaming', $data) && null === $data['streaming']) {
+                $animeFull->setStreaming(null);
             }
 
             foreach ($data as $key => $value_12) {
@@ -933,7 +935,7 @@ if (!class_exists(Kernel::class) || (Kernel::MAJOR_VERSION >= 7 || Kernel::MAJOR
                 $animeFull->setExternal(null);
             }
 
-            if (\array_key_exists('streaming', $data)) {
+            if (\array_key_exists('streaming', $data) && null !== $data['streaming']) {
                 $values_11 = [];
                 foreach ($data['streaming'] as $value_11) {
                     $values_11[] = $this->denormalizer->denormalize($value_11, AnimeFullStreamingItem::class, 'json', $context);
@@ -941,6 +943,8 @@ if (!class_exists(Kernel::class) || (Kernel::MAJOR_VERSION >= 7 || Kernel::MAJOR
 
                 $animeFull->setStreaming($values_11);
                 unset($data['streaming']);
+            } elseif (\array_key_exists('streaming', $data) && null === $data['streaming']) {
+                $animeFull->setStreaming(null);
             }
 
             foreach ($data as $key => $value_12) {

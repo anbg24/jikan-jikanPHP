@@ -28,8 +28,8 @@ class ClientTest extends TestCase
     {
         $jikan = Client::create();
         /** @var AnimeIdGetResponse200 $response */
-        $response = $jikan->getAnimeById(49817);
+        $response = $jikan->getAnimeById(50385);
         $anime = $response->getData();
-        self::assertEquals(49817, $anime->getMalId());
+        self::assertEquals(50385, $anime->getMalId());
     }
 }

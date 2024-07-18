@@ -274,9 +274,9 @@ class AnimeFull extends \ArrayObject
     protected $external;
 
     /**
-     * @var list<AnimeFullStreamingItem>
+     * @var list<AnimeFullStreamingItem>|null
      */
-    protected $streaming = [];
+    protected $streaming;
 
     /**
      * MyAnimeList ID.
@@ -1032,17 +1032,17 @@ class AnimeFull extends \ArrayObject
     }
 
     /**
-     * @return list<AnimeFullStreamingItem>
+     * @return list<AnimeFullStreamingItem>|null
      */
-    public function getStreaming(): array
+    public function getStreaming(): ?array
     {
         return $this->streaming;
     }
 
     /**
-     * @param list<AnimeFullStreamingItem> $streaming
+     * @param list<AnimeFullStreamingItem>|null $streaming
      */
-    public function setStreaming(array $streaming): self
+    public function setStreaming(?array $streaming): self
     {
         $this->initialized['streaming'] = true;
         $this->streaming = $streaming;

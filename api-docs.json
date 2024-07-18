@@ -5348,6 +5348,7 @@
             }
           },
           "streaming": {
+            "nullable": true,
             "type": "array",
             "items": {
               "properties": {

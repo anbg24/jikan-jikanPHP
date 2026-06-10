@@ -15,16 +15,16 @@ class AnimeVideos extends \ArrayObject
     }
 
     /**
-     * @var AnimeVideosData
+     * @var AnimeVideosData|null
      */
     protected $data;
 
-    public function getData(): AnimeVideosData
+    public function getData(): ?AnimeVideosData
     {
-        return $this->data;
+        return $this->data ?? null;
     }
 
-    public function setData(AnimeVideosData $animeVideosData): self
+    public function setData(?AnimeVideosData $animeVideosData): self
     {
         $this->initialized['data'] = true;
         $this->data = $animeVideosData;

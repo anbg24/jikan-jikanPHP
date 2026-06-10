@@ -44,6 +44,7 @@
         "update-jikan": [
             "rm -rf src/*",
             "php vendor/bin/jane-openapi generate --config-file=config/jikan.php",
+            "php config/post-generate.php",
             "php vendor/bin/php-cs-fixer -q --allow-risky=yes --config=config/.php-cs-fixer.dist.php fix",
             "php vendor/bin/rector --no-diffs --clear-cache --config=config/rector.php",
             "php vendor/bin/php-cs-fixer -q --allow-risky=yes --config=config/.php-cs-fixer.dist.php fix"
